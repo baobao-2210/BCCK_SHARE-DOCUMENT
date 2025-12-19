@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bcck.HomeActivity;
 import com.example.bcck.R;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -221,7 +222,11 @@ public class ChatFragment extends Fragment {
 
     private void setupButtons() {
         btnBack.setOnClickListener(v -> {
-            if (getActivity() != null) getActivity().onBackPressed();
+            // Chuyển từ màn hình hiện tại về HomeActivity
+            Intent intent = new Intent(getContext(), HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
         });
 
         iconSettings.setOnClickListener(v -> {
