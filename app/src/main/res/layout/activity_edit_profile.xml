@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#E8E8E8">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CHỈNH SỬA HỒ SƠ"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:textColor="#171DAF"/>
+
+    <EditText
+        android:id="@+id/edtFullName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Họ và tên"
+        android:background="@android:color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="10dp"/>
+
+    <EditText
+        android:id="@+id/edtClass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Lớp"
+        android:background="@android:color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="10dp"/>
+
+    <EditText
+        android:id="@+id/edtDepartment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Khoa"
+        android:background="@android:color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="10dp"/>
+
+    <EditText
+        android:id="@+id/edtYear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Khóa"
+        android:inputType="number"
+        android:background="@android:color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LƯU THAY ĐỔI"
+        android:backgroundTint="#171DAF"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"/>
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="HỦY"
+        android:backgroundTint="@color/black"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/white"/>
+
+</LinearLayout>

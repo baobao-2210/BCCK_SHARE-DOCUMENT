@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- FrameLayout chứa Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavContainer"
+        />
+    <!-- Bottom Navigation Container -->
+    <View
+        android:id="@+id/bottomNavContainer"
+        android:layout_width="0dp"
+        android:layout_height="70dp"
+        android:background="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Trang Chủ -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navDocs"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/navGroup"
+        app:layout_constraintTop_toTopOf="@id/bottomNavContainer"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavContainer"
+        app:layout_constraintHorizontal_weight="1">
+
+
+        <ImageView
+            android:id="@+id/navDocsIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_agenda"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/navDocsText"
+            android:layout_marginTop="8dp"
+            app:tint="#5B5FC7" />
+
+        <TextView
+            android:id="@+id/navDocsText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Trang Chủ"
+            android:textColor="#5B5FC7"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Nhóm -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navGroup"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintStart_toEndOf="@id/navDocs"
+        app:layout_constraintEnd_toStartOf="@id/navLibrary"
+        app:layout_constraintTop_toTopOf="@id/bottomNavContainer"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavContainer"
+        app:layout_constraintHorizontal_weight="1">
+
+        <ImageView
+            android:id="@+id/navGroupIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_myplaces"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/navGroupText"
+            android:layout_marginTop="8dp"
+            app:tint="#666666" />
+
+        <TextView
+            android:id="@+id/navGroupText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nhóm"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Tài Liệu -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navLibrary"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintStart_toEndOf="@id/navGroup"
+        app:layout_constraintEnd_toStartOf="@id/navChat"
+        app:layout_constraintTop_toTopOf="@id/bottomNavContainer"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavContainer"
+        app:layout_constraintHorizontal_weight="1">
+
+        <ImageView
+            android:id="@+id/navLibraryIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_save"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/navLibraryText"
+            android:layout_marginTop="8dp"
+            app:tint="#666666" />
+
+        <TextView
+            android:id="@+id/navLibraryText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Đăng tải"
+            android:textColor="#666666"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Chat -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navChat"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintStart_toEndOf="@id/navLibrary"
+        app:layout_constraintEnd_toStartOf="@id/navProfile"
+        app:layout_constraintTop_toTopOf="@id/bottomNavContainer"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavContainer"
+        app:layout_constraintHorizontal_weight="1">
+
+        <ImageView
+            android:id="@+id/navChatIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_send"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/navChatText"
+            android:layout_marginTop="8dp"
+            app:tint="#666666" />
+
+        <TextView
+            android:id="@+id/navChatText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chat"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Cá nhân -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navProfile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintStart_toEndOf="@id/navChat"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bottomNavContainer"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavContainer"
+        app:layout_constraintHorizontal_weight="1">
+
+        <ImageView
+            android:id="@+id/navProfileIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/icon_person"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/navProfileText"
+            android:layout_marginTop="8dp"
+            app:tint="#666666" />
+
+        <TextView
+            android:id="@+id/navProfileText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cá nhân"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

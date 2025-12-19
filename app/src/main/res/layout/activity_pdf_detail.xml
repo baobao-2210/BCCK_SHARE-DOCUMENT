@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:background="@drawable/bg_toggle_container"> <ImageView
+    android:id="@+id/imgAuthorAvatar"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:src="@drawable/ic_onedrive"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    android:contentDescription="Avatar" />
+
+    <TextView
+        android:id="@+id/tvAuthorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="TS.Nguyễn Văn B"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@id/imgAuthorAvatar"
+        app:layout_constraintTop_toTopOf="@id/imgAuthorAvatar"
+        app:layout_constraintBottom_toBottomOf="@id/imgAuthorAvatar" />
+
+    <ImageView
+        android:id="@+id/btnClose"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="#757575"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Close" />
+
+    <TextView
+        android:id="@+id/tvDocumentTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Lập trình hướng đối tượng - Chương 1"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgAuthorAvatar"
+        app:layout_constraintEnd_toStartOf="@id/tvFileType" />
+
+    <TextView
+        android:id="@+id/tvFileType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#D32F2F"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="PDF"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvDocumentTitle" />
+
+    <LinearLayout
+        android:id="@+id/infoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tvDocumentTitle">
+
+        <TextView android:id="@+id/tvSubject" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_calendar" android:drawablePadding="8dp" android:text="Lập trình hướng đối tượng" android:paddingVertical="4dp"/>
+        <TextView android:id="@+id/tvTeacher" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_star" android:drawablePadding="8dp" android:text="TS. Nguyễn Văn A" android:paddingVertical="4dp"/>
+        <TextView android:id="@+id/tvCourse" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_google" android:drawablePadding="4dp" android:text="Công nghệ thông tin" android:paddingVertical="4dp"/>
+        <TextView android:id="@+id/tvYear" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_calendar" android:drawablePadding="8dp" android:text="Năm học: 2024-2025" android:paddingVertical="4dp"/>
+        <TextView android:id="@+id/tvUploader" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_user_2" android:drawablePadding="8dp" android:text="Đăng bởi: Nguyễn Văn B" android:paddingVertical="4dp"/>
+        <TextView android:id="@+id/tvUploadDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_clock" android:drawablePadding="8dp" android:text="Ngày đăng: 10/10/2025" android:paddingVertical="4dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/statsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/infoLayout">
+
+        <TextView android:id="@+id/tvDownloads" android:layout_width="wrap_content" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_download" android:drawablePadding="4dp" android:text="234" android:layout_marginEnd="24dp"/>
+
+        <TextView android:id="@+id/tvRating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:drawableStart="@drawable/ic_star" android:drawablePadding="4dp" android:text="4.5"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/actionRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/statsLayout">
+
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#161515"
+            android:drawableStart="@drawable/ic_download"
+            android:text="Tải xuống"
+            android:textColorLink="#ADA7A7" />
+
+        <Button
+            android:id="@+id/btnShare"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Chia sẻ"
+            android:drawableStart="@drawable/ic_star"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textColor="#3F51B5"
+            android:backgroundTint="#FFFFFF"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/actionRow2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/actionRow1"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btnPreview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Xem trước"
+            android:drawableStart="@drawable/ic_document"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textColor="#212121"
+            android:backgroundTint="#FFFFFF"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Nhắn tin"
+            android:drawableStart="@drawable/ic_message"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textColor="#212121"
+            android:backgroundTint="#EDEDED"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

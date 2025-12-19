@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
+    android:backgroundTint="@android:color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Icon nhóm (Hình tròn với # và màu tím) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/groupIconCard"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:cardCornerRadius="50dp"
+            app:cardElevation="0dp"
+            android:backgroundTint="#270A78"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_dropbox"
+                app:tint="#EDE6E6" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Tên nhóm -->
+        <TextView
+            android:id="@+id/tvGroupName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Lập Trình Di Đông"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintStart_toEndOf="@id/groupIconCard"
+            app:layout_constraintEnd_toStartOf="@id/btnChat"
+            app:layout_constraintTop_toTopOf="@id/groupIconCard" />
+
+        <!-- Số lượng thành viên -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/memberLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/groupIconCard"
+            app:layout_constraintTop_toBottomOf="@id/tvGroupName"
+            app:layout_constraintBottom_toBottomOf="@id/groupIconCard">
+
+            <ImageView
+                android:id="@+id/iconMembers"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/ic_menu_myplaces"
+                app:tint="#666666"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:id="@+id/tvMemberCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="38 thành viên"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginStart="6dp"
+                app:layout_constraintStart_toEndOf="@id/iconMembers"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Button Chat -->
+        <Button
+            android:id="@+id/btnChat"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Chat"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#171ED0"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:drawableStart="@android:drawable/ic_menu_send"
+            android:drawablePadding="8dp"
+            android:drawableTint="@android:color/white"
+            app:cornerRadius="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

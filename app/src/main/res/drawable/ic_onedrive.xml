@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="70dp"
+    android:viewportWidth="70"
+    android:viewportHeight="70">
+
+    <!-- Outer circle -->
+    <path
+        android:fillColor="#1E3A8A"
+        android:pathData="M35,5C18.4,5 5,18.4 5,35C5,51.6 18.4,65 35,65C51.6,65 65,51.6 65,35C65,18.4 51.6,5 35,5Z"/>
+
+    <!-- Book shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,20L25,50L35,45L45,50L45,20Z"/>
+
+    <!-- Book pages lines -->
+    <path
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1"
+        android:pathData="M28,25L42,25"/>
+    <path
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1"
+        android:pathData="M28,30L42,30"/>
+    <path
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1"
+        android:pathData="M28,35L42,35"/>
+
+    <!-- UTE text circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,12C30,12 26,16 26,21C26,26 30,30 35,30C40,30 44,26 44,21C44,16 40,12 35,12Z"/>
+
+    <!-- Text "UTE" path (simplified) -->
+    <path
+        android:fillColor="#1E3A8A"
+        android:pathData="M30,17L30,22C30,23.1 30.9,24 32,24C33.1,24 34,23.1 34,22L34,17M36,17L36,24M38,17L38,24M38,17L41,17M38,20.5L40,20.5"/>
+</vector>

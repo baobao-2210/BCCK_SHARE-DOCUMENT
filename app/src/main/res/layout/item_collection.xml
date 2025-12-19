@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Icon Folder với màu nền -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardFolder"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_folder"
+                android:tint="@android:color/white"
+                app:tint="@android:color/white" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Tên bộ sưu tập -->
+        <TextView
+            android:id="@+id/tvCollectionName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ôn thi giữa kỳ"
+            android:textSize="16sp"
+            android:textColor="#212121"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <!-- Số lượng tài liệu -->
+        <TextView
+            android:id="@+id/tvDocumentCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="12 tài liệu"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Nút Edit và Delete -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/imgEdit"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:src="@android:drawable/ic_menu_edit"
+                android:padding="6dp"
+                android:tint="#666666"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="24dp"
+                android:background="#E0E0E0" />
+
+            <ImageView
+                android:id="@+id/imgDelete"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:src="@android:drawable/ic_menu_delete"
+                android:padding="6dp"
+                android:tint="#EF4444"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
