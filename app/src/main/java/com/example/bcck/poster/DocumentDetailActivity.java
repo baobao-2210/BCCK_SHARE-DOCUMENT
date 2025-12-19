@@ -6,16 +6,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.webkit.MimeTypeMap;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bcck.Chat.ChatDetailActivity;
 import com.example.bcck.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,16 +32,16 @@ public class DocumentDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pdf_detail);
 
         Document document = (Document) getIntent().getSerializableExtra(EXTRA_DOCUMENT);
-
-        if (document != null) {
-            initViewsAndData(document);
-        } else {
+        if (document == null) {
+            Toast.makeText(this, "Thiếu dữ liệu tài liệu", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
+
+        initViewsAndData(document);
     }
 
     private void initViewsAndData(Document document) {
-        // 1. THAM CHIẾU VIEWS
         TextView tvAuthorName = findViewById(R.id.tvAuthorName);
         TextView tvDocumentTitle = findViewById(R.id.tvDocumentTitle);
         TextView tvFileType = findViewById(R.id.tvFileType);
@@ -59,24 +60,22 @@ public class DocumentDetailActivity extends AppCompatActivity {
         Button btnMessage = findViewById(R.id.btnMessage);
         ImageView btnClose = findViewById(R.id.btnClose);
 
-        // 2. GÁN DỮ LIỆU
-        tvAuthorName.setText(document.getAuthorName());
-        tvDocumentTitle.setText(document.getTitle());
-        tvFileType.setText(document.getDocType());
-        tvSubject.setText(document.getSubject());
-        tvTeacher.setText(document.getTeacher());
-        tvCourse.setText(document.getMajor());
-        tvYear.setText("Năm học: " + document.getYear());
-        tvUploader.setText("Đăng bởi: " + document.getUploaderName());
+        tvAuthorName.setText(safe(document.getAuthorName()));
+        tvDocumentTitle.setText(safe(document.getTitle()));
+        tvFileType.setText(safe(document.getDocType()));
+        tvSubject.setText(safe(document.getSubject()));
+        tvTeacher.setText(safe(document.getTeacher()));
+        tvCourse.setText(safe(document.getMajor()));
+        tvYear.setText("Năm học: " + safe(document.getYear()));
+        tvUploader.setText("Đăng bởi: " + safe(document.getUploaderName()));
 
         String dateString = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 .format(new Date(document.getUploadTimestamp()));
         tvUploadDate.setText("Ngày đăng: " + dateString);
 
         tvDownloads.setText(String.valueOf(document.getDownloads()));
-        tvRating.setText(String.format("%.1f", document.getRating()));
+        tvRating.setText(String.format(Locale.getDefault(), "%.1f", document.getRating()));
 
-        // 3. SỰ KIỆN CLICK
         btnDownload.setOnClickListener(v -> handleDownload(document));
         btnShare.setOnClickListener(v -> handleShare(document));
         btnPreview.setOnClickListener(v -> handlePreview(document));
@@ -84,39 +83,34 @@ public class DocumentDetailActivity extends AppCompatActivity {
         btnClose.setOnClickListener(v -> finish());
     }
 
-    // ================== XỬ LÝ TẢI XUỐNG (QUAN TRỌNG) ==================
-    // ================== CODE SỬA LỖI ĐUÔI FILE ==================
+    private String safe(String s) {
+        return s == null ? "" : s;
+    }
+
     private void handleDownload(Document document) {
         if (document.getFileUrl() == null || document.getFileUrl().isEmpty()) {
             Toast.makeText(this, "Link lỗi!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 1. Xử lý Link (Thêm fl_attachment)
         String downloadUrl = document.getFileUrl();
         if (downloadUrl.contains("/upload/")) {
             downloadUrl = downloadUrl.replace("/upload/", "/upload/fl_attachment/");
         }
 
-        // 2. Xử lý Tên file và Đuôi file
-        String fileName = document.getTitle();
-        String extension = "pdf"; // Mặc định
+        String fileName = document.getTitle() == null ? "tai_lieu" : document.getTitle();
+        String extension = "pdf";
 
-        // Lấy đuôi file chuẩn từ Firestore (nếu có)
         if (document.getDocType() != null && !document.getDocType().isEmpty()) {
             extension = document.getDocType().toLowerCase();
             if (extension.equals("file") || extension.length() > 4) extension = "pdf";
         }
 
-        // Nếu tên file chưa có đuôi, tự động nối thêm
         if (!fileName.toLowerCase().endsWith("." + extension)) {
             fileName = fileName + "." + extension;
         } else {
-            // Trường hợp tên đã có đuôi (VD: BaoCao.docx), ta cần tách cái đuôi "docx" ra để dùng bên dưới
             int lastDot = fileName.lastIndexOf('.');
-            if (lastDot > 0) {
-                extension = fileName.substring(lastDot + 1).toLowerCase();
-            }
+            if (lastDot > 0) extension = fileName.substring(lastDot + 1).toLowerCase();
         }
 
         try {
@@ -124,17 +118,8 @@ public class DocumentDetailActivity extends AppCompatActivity {
             request.setTitle(fileName);
             request.setDescription("Đang tải tài liệu...");
 
-            // ==================================================================
-            // PHẦN MỚI QUAN TRỌNG: TỰ ĐỘNG XÁC ĐỊNH MIME TYPE
-            // ==================================================================
-            // Dựa vào đuôi file (docx, pdf, xlsx...), ta nhờ Android tìm MimeType chuẩn
             String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-
-            // Nếu tìm thấy MimeType chuẩn (ví dụ application/msword), gán vào request
-            if (mimeType != null && !mimeType.isEmpty()) {
-                request.setMimeType(mimeType);
-            }
-            // ==================================================================
+            if (mimeType != null && !mimeType.isEmpty()) request.setMimeType(mimeType);
 
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.allowScanningByMediaScanner();
@@ -150,14 +135,12 @@ public class DocumentDetailActivity extends AppCompatActivity {
         }
     }
 
-    // ================== CÁC CHỨC NĂNG KHÁC ==================
-
     private void handleShare(Document document) {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
         sendIntent.setType("text/plain");
-        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Chia sẻ tài liệu: " + document.getTitle());
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "Hãy xem tài liệu này: " + document.getTitle() +
-                "\nLink tải: " + document.getFileUrl());
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Chia sẻ tài liệu: " + safe(document.getTitle()));
+        sendIntent.putExtra(Intent.EXTRA_TEXT,
+                "Hãy xem tài liệu này: " + safe(document.getTitle()) + "\nLink tải: " + safe(document.getFileUrl()));
         startActivity(Intent.createChooser(sendIntent, "Chia sẻ tài liệu qua..."));
     }
 
@@ -167,7 +150,6 @@ public class DocumentDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Cách 1: Thử dùng Google Docs Viewer
         String googleViewerUrl = "https://docs.google.com/gview?embedded=true&url=" + document.getFileUrl();
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -176,7 +158,6 @@ public class DocumentDetailActivity extends AppCompatActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            // Cách 2: Nếu Google Viewer lỗi, mở trực tiếp file gốc để trình duyệt tự xử lý
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(document.getFileUrl()));
             try {
                 startActivity(browserIntent);
@@ -185,18 +166,35 @@ public class DocumentDetailActivity extends AppCompatActivity {
             }
         }
     }
-
     private void handleMessage(Document document) {
-        String receiverName = document.getUploaderName();
         String receiverId = document.getUploaderId();
 
-        if (receiverName != null && !receiverName.isEmpty() && receiverId != null && !receiverId.isEmpty()) {
-            Intent intent = new Intent(this, ChatDetailActivity.class);
-            intent.putExtra("RECEIVER_NAME", receiverName);
-            intent.putExtra("RECEIVER_ID", receiverId);
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "Không thể xác định người nhận để chat.", Toast.LENGTH_SHORT).show();
+        // ưu tiên fullName, fallback email
+        String receiverName = document.getUploaderFullName();
+        if (receiverName == null || receiverName.trim().isEmpty()) {
+            receiverName = document.getUploaderName();
         }
+
+        if (receiverId == null || receiverId.trim().isEmpty()) {
+            Toast.makeText(this, "Bài này thiếu uploaderId", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (receiverId.equals(myUid)) {
+            Toast.makeText(this, "Bạn đang là người đăng bài", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, ChatDetailActivity.class);
+        intent.putExtra("RECEIVER_ID", receiverId);
+        intent.putExtra("RECEIVER_NAME", receiverName == null ? "Chat" : receiverName);
+        startActivity(intent);
     }
+
 }
