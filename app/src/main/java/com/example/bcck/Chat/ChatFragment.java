@@ -48,7 +48,13 @@ public class ChatFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        initViews(view);
+        recyclerViewChats = view.findViewById(R.id.recyclerViewChats);
+        searchBox = view.findViewById(R.id.searchBox);
+        btnBack = view.findViewById(R.id.btnBack);
+        iconSettings = view.findViewById(R.id.iconSettings);
+        iconNotification = view.findViewById(R.id.iconNotification);
+        iconProfile = view.findViewById(R.id.iconProfile);
+
         setupRecyclerView();
         setupSearch();
         setupButtons();
@@ -57,25 +63,16 @@ public class ChatFragment extends Fragment {
         return view;
     }
 
-    private void initViews(View view) {
-        recyclerViewChats = view.findViewById(R.id.recyclerViewChats);
-        searchBox = view.findViewById(R.id.searchBox);
-        btnBack = view.findViewById(R.id.btnBack);
-        iconSettings = view.findViewById(R.id.iconSettings);
-        iconNotification = view.findViewById(R.id.iconNotification);
-        iconProfile = view.findViewById(R.id.iconProfile);
-    }
-
     private void setupRecyclerView() {
         recyclerViewChats.setLayoutManager(new LinearLayoutManager(getContext()));
 
         chatAdapter = new ChatAdapter(filteredChatList, chatItem -> {
-            if (chatItem.getChatId() == null || chatItem.getChatId().isEmpty()) return;
-
             Intent intent = new Intent(getActivity(), ChatDetailActivity.class);
             intent.putExtra("chatId", chatItem.getChatId());
             intent.putExtra("chatName", chatItem.getChatName());
             intent.putExtra("isGroup", chatItem.isGroup());
+            intent.putExtra("RECEIVER_ID", chatItem.getOtherUserId());
+            intent.putExtra("RECEIVER_NAME", chatItem.getChatName());
             startActivity(intent);
         });
 
@@ -84,46 +81,43 @@ public class ChatFragment extends Fragment {
 
     private void listenChatsFromFirestore() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            Log.e("CHAT", "User is null, chưa đăng nhập");
-            Toast.makeText(getContext(), "Chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            Log.e("CHAT", "User is null");
             return;
         }
 
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        Log.d("CHAT", "My uid = " + uid);
-        Toast.makeText(getContext(), "UID: " + uid, Toast.LENGTH_SHORT).show();
-
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         if (chatListener != null) chatListener.remove();
 
         chatListener = db.collection("chats")
-                .whereArrayContains("members", uid)
+                .whereArrayContains("members", myUid)
                 .orderBy("lastTime", Query.Direction.DESCENDING)
                 .addSnapshotListener((snap, e) -> {
                     if (e != null) {
                         Log.e("CHAT", "listenChats error", e);
-                        Toast.makeText(getContext(), "Firestore lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         return;
                     }
                     if (snap == null) return;
-
-                    Log.d("CHAT", "snap size = " + snap.size());
-                    Toast.makeText(getContext(), "Chats: " + snap.size(), Toast.LENGTH_SHORT).show();
 
                     chatList.clear();
 
                     for (DocumentSnapshot d : snap.getDocuments()) {
                         String chatId = d.getId();
 
+                        String type = d.getString("type");
+                        boolean isGroup = "group".equals(type);
+
                         String title = d.getString("title");
-                        if (title == null || title.trim().isEmpty()) title = "Chat";
+                        if (title == null) title = "";
 
                         String lastMessage = d.getString("lastMessage");
                         if (lastMessage == null) lastMessage = "";
 
-                        boolean isGroup = "group".equals(d.getString("type"));
+                        String lastSenderId = d.getString("lastSenderId");
+                        if (lastSenderId != null && lastSenderId.equals(myUid) && !lastMessage.isEmpty()) {
+                            lastMessage = "Bạn: " + lastMessage;
+                        }
 
                         String time = "";
                         Timestamp ts = d.getTimestamp("lastTime");
@@ -131,13 +125,70 @@ public class ChatFragment extends Fragment {
                             time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(ts.toDate());
                         }
 
-                        String avatarText = makeAvatarText(title);
+                        String otherUserId = null;
+                        List<String> members = (List<String>) d.get("members");
+                        if (!isGroup && members != null && members.size() >= 2) {
+                            for (String m : members) {
+                                if (m != null && !m.equals(myUid)) {
+                                    otherUserId = m;
+                                    break;
+                                }
+                            }
+                        }
 
-                        chatList.add(new ChatItem(chatId, title, lastMessage, time, avatarText, isGroup));
+                        String showName;
+                        if (isGroup) {
+                            showName = title.isEmpty() ? "Nhóm chat" : title;
+                        } else {
+                            showName = "Đang tải...";
+                        }
+
+                        chatList.add(new ChatItem(
+                                chatId,
+                                showName,
+                                lastMessage,
+                                time,
+                                makeAvatarText(showName),
+                                isGroup,
+                                otherUserId
+                        ));
                     }
 
                     applyCurrentFilter();
+
+                    // quan trọng: resolve tên user bên kia cho direct chat
+                    resolveDirectNames(myUid);
+
+                    Log.d("CHAT", "snap size=" + snap.size());
                 });
+    }
+
+    private void resolveDirectNames(String myUid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        for (int i = 0; i < chatList.size(); i++) {
+            ChatItem item = chatList.get(i);
+            if (item.isGroup()) continue;
+            String otherUid = item.getOtherUserId();
+            if (otherUid == null || otherUid.isEmpty()) continue;
+
+            final int index = i;
+
+            db.collection("users").document(otherUid).get()
+                    .addOnSuccessListener(userDoc -> {
+                        String fullName = userDoc.getString("fullName");
+                        String email = userDoc.getString("email");
+
+                        String display = (fullName != null && !fullName.trim().isEmpty())
+                                ? fullName.trim()
+                                : (email != null ? email : "Người dùng");
+
+                        item.setChatName(display);
+                        item.setAvatarText(makeAvatarText(display));
+
+                        applyCurrentFilter(); // để list đang filter vẫn update đúng
+                    });
+        }
     }
 
     private void setupSearch() {
@@ -150,7 +201,22 @@ public class ChatFragment extends Fragment {
 
     private void applyCurrentFilter() {
         String query = searchBox.getText() == null ? "" : searchBox.getText().toString().trim();
-        filterChats(query);
+        filteredChatList.clear();
+
+        if (query.isEmpty()) {
+            filteredChatList.addAll(chatList);
+        } else {
+            String q = query.toLowerCase();
+            for (ChatItem c : chatList) {
+                String name = c.getChatName() == null ? "" : c.getChatName();
+                String msg = c.getLastMessage() == null ? "" : c.getLastMessage();
+                if (name.toLowerCase().contains(q) || msg.toLowerCase().contains(q)) {
+                    filteredChatList.add(c);
+                }
+            }
+        }
+
+        chatAdapter.notifyDataSetChanged();
     }
 
     private void setupButtons() {
@@ -159,8 +225,9 @@ public class ChatFragment extends Fragment {
         });
 
         iconSettings.setOnClickListener(v -> {
-            Intent i = new Intent(getActivity(), SelectUserActivity.class);
-            startActivity(i);
+            Toast.makeText(getContext(), "Chọn người để chat", Toast.LENGTH_SHORT).show();
+            // nếu bạn có SelectUserActivity thì mở ở đây
+            // startActivity(new Intent(getActivity(), SelectUserActivity.class));
         });
 
         iconNotification.setOnClickListener(v ->
@@ -170,26 +237,6 @@ public class ChatFragment extends Fragment {
         iconProfile.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Cá nhân", Toast.LENGTH_SHORT).show()
         );
-    }
-
-    private void filterChats(String query) {
-        filteredChatList.clear();
-
-        if (query.isEmpty()) {
-            filteredChatList.addAll(chatList);
-        } else {
-            String lowerQuery = query.toLowerCase();
-            for (ChatItem chat : chatList) {
-                String name = chat.getChatName() == null ? "" : chat.getChatName();
-                String msg = chat.getLastMessage() == null ? "" : chat.getLastMessage();
-
-                if (name.toLowerCase().contains(lowerQuery) || msg.toLowerCase().contains(lowerQuery)) {
-                    filteredChatList.add(chat);
-                }
-            }
-        }
-
-        chatAdapter.notifyDataSetChanged();
     }
 
     private String makeAvatarText(String title) {

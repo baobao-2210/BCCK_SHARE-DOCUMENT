@@ -24,6 +24,10 @@ public class Document implements Serializable {
     public Document() {
         // Firestore bắt buộc cần constructor rỗng
     }
+    private String uploaderFullName;
+
+    public String getUploaderFullName() { return uploaderFullName; }
+    public void setUploaderFullName(String uploaderFullName) { this.uploaderFullName = uploaderFullName; }
 
     public Document(String authorName, String title, String docType, String subject, String teacher, String major,
                     int downloads, int likes, float rating, String uploaderName, String year, long uploadTimestamp,
