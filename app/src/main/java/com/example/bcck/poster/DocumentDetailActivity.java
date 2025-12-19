@@ -187,16 +187,21 @@ public class DocumentDetailActivity extends AppCompatActivity {
     }
 
     private void handleMessage(Document document) {
-        String receiverName = document.getUploaderName();
-        String receiverId = document.getUploaderId();
+        String uploaderName = document.getUploaderName();
+        String uploaderId = document.getUploaderId(); // Đây là ID người đăng
 
-        if (receiverName != null && !receiverName.isEmpty() && receiverId != null && !receiverId.isEmpty()) {
+        if (uploaderId != null && !uploaderId.isEmpty()) {
             Intent intent = new Intent(this, ChatDetailActivity.class);
-            intent.putExtra("RECEIVER_NAME", receiverName);
-            intent.putExtra("RECEIVER_ID", receiverId);
+
+            // ĐỔI TÊN KEY Ở ĐÂY CHO KHỚP VỚI ChatDetailActivity
+            // Lưu ý: Hiện tại ChatDetailActivity dùng chatId để lấy dữ liệu từ Firestore
+            // Nếu bạn chưa có hệ thống tạo ChatId tự động, tạm thời ta gán uploaderId vào
+            intent.putExtra("chatId", uploaderId);
+            intent.putExtra("chatName", uploaderName);
+
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Không thể xác định người nhận để chat.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không tìm thấy ID người đăng!", Toast.LENGTH_SHORT).show();
         }
     }
 }
