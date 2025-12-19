@@ -40,7 +40,7 @@ import java.util.Map;
 public class ProfileFragment extends Fragment {
 
     // Khai báo View theo đúng ID trong XML mới
-    private ImageView btnBack, btnSettings, btnEditAvatar, imgAvatar;
+    private ImageView btnBack, btnlogout, btnEditAvatar, imgAvatar;
     private TextView tvName, tvClass, tvDepartment, tvYear, tvEmail, tvTitle;
     private ConstraintLayout btnUpdateInfo, btnDocuments, btnPosts, btnLibrary, btnDownloadHistory, btnMyDocuments, btnSecurity;
     private ProgressBar progressBarAvatar;
@@ -91,7 +91,7 @@ public class ProfileFragment extends Fragment {
     private void initViews(View view) {
         // Ánh xạ Header & Avatar
         btnBack = view.findViewById(R.id.btnBack);
-        btnSettings = view.findViewById(R.id.btnSettings);
+        btnlogout = view.findViewById(R.id.btnlogout);
         imgAvatar = view.findViewById(R.id.imgAvatar);
         btnEditAvatar = view.findViewById(R.id.btnEditAvatar);
         progressBarAvatar = view.findViewById(R.id.progressBarAvatar); // Vòng tròn loading
@@ -138,7 +138,7 @@ public class ProfileFragment extends Fragment {
 
         // Các nút khác (Demo Toast)
         btnDocuments.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), com.example.bcck.library.ThuVienActivity.class);
+            Intent intent = new Intent(requireContext(), com.example.bcck.HomeActivity.class);
             startActivity(intent);
         });
 
@@ -163,7 +163,37 @@ public class ProfileFragment extends Fragment {
         btnSecurity.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Bảo mật và quyền riêng tư", Toast.LENGTH_SHORT).show());
 
-        btnSettings.setOnClickListener(v -> Toast.makeText(getContext(), "Cài đặt", Toast.LENGTH_SHORT).show());
+        btnlogout.setOnClickListener(v -> {
+            // Hiển thị dialog xác nhận trước khi đăng xuất
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Đăng xuất")
+                    .setMessage("Bạn có chắc chắn muốn đăng xuất?")
+                    .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                        // Thực hiện đăng xuất
+                        performLogout();
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+        });
+    }
+    private void performLogout() {
+        // Hiển thị loading (tùy chọn)
+        Toast.makeText(getContext(), "Đang đăng xuất...", Toast.LENGTH_SHORT).show();
+
+        // Đăng xuất khỏi Firebase
+        mAuth.signOut();
+
+        // Chuyển về màn hình đăng nhập
+        Intent intent = new Intent(requireContext(), com.example.bcck.RegisterActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+
+        // Kết thúc Activity hiện tại
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
+
+        Toast.makeText(getContext(), "Đã đăng xuất thành công", Toast.LENGTH_SHORT).show();
     }
 
     // --- HÀM XỬ LÝ ẢNH BASE64 (MIỄN PHÍ - KHÔNG CẦN STORAGE) ---
@@ -270,7 +300,7 @@ public class ProfileFragment extends Fragment {
                     Glide.with(this)
                             .load(imageByteArray)
                             .circleCrop()
-                            .placeholder(android.R.drawable.ic_menu_myplaces)
+                            .placeholder(R.drawable.ute)
                             .into(imgAvatar);
                 } catch (IllegalArgumentException e) {
                     Log.e("Profile", "Lỗi giải mã ảnh Base64");

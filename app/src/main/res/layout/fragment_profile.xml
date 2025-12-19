@@ -44,17 +44,16 @@
                 android:textStyle="bold"
                 android:gravity="center"
                 app:layout_constraintStart_toEndOf="@id/btnBack"
-                app:layout_constraintEnd_toStartOf="@id/btnSettings"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
             <ImageView
-                android:id="@+id/btnSettings"
+                android:id="@+id/btnlogout"
                 android:layout_width="31dp"
                 android:layout_height="37dp"
                 android:background="@android:color/black"
                 android:padding="8dp"
-                android:src="@drawable/icon_person"
+                android:src="@drawable/ic_logout"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
