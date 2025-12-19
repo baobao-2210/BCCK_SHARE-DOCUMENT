@@ -138,7 +138,7 @@ public class ProfileFragment extends Fragment {
 
         // Các nút khác (Demo Toast)
         btnDocuments.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), com.example.bcck.library.ThuVienActivity.class);
+            Intent intent = new Intent(requireContext(), com.example.bcck.HomeActivity.class);
             startActivity(intent);
         });
 
@@ -270,7 +270,7 @@ public class ProfileFragment extends Fragment {
                     Glide.with(this)
                             .load(imageByteArray)
                             .circleCrop()
-                            .placeholder(android.R.drawable.ic_menu_myplaces)
+                            .placeholder(R.drawable.ute)
                             .into(imgAvatar);
                 } catch (IllegalArgumentException e) {
                     Log.e("Profile", "Lỗi giải mã ảnh Base64");
