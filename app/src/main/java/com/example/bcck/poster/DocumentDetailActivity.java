@@ -166,54 +166,33 @@ public class DocumentDetailActivity extends AppCompatActivity {
             }
         }
     }
-
     private void handleMessage(Document document) {
-
-        String uploaderName = document.getUploaderName();
-        String uploaderId = document.getUploaderId(); // Đây là ID người đăng
-
-        if (uploaderId != null && !uploaderId.isEmpty()) {
-            Intent intent = new Intent(this, ChatDetailActivity.class);
-
-            // ĐỔI TÊN KEY Ở ĐÂY CHO KHỚP VỚI ChatDetailActivity
-            // Lưu ý: Hiện tại ChatDetailActivity dùng chatId để lấy dữ liệu từ Firestore
-            // Nếu bạn chưa có hệ thống tạo ChatId tự động, tạm thời ta gán uploaderId vào
-            intent.putExtra("chatId", uploaderId);
-            intent.putExtra("chatName", uploaderName);
-
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "Không tìm thấy ID người đăng!", Toast.LENGTH_SHORT).show();
-            String receiverId = document.getUploaderId();
-
-            // ưu tiên fullName, fallback email
-            String receiverName = document.getUploaderFullName();
-            if (receiverName == null || receiverName.trim().isEmpty()) {
-                receiverName = document.getUploaderName();
-
-            }
-
-            if (receiverId == null || receiverId.trim().isEmpty()) {
-                Toast.makeText(this, "Bài này thiếu uploaderId", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-                Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            if (receiverId.equals(myUid)) {
-                Toast.makeText(this, "Bạn đang là người đăng bài", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Intent intent = new Intent(this, ChatDetailActivity.class);
-            intent.putExtra("RECEIVER_ID", receiverId);
-            intent.putExtra("RECEIVER_NAME", receiverName == null ? "Chat" : receiverName);
-            startActivity(intent);
+        String receiverId = document.getUploaderId();
+        if (receiverId == null || receiverId.trim().isEmpty()) {
+            Toast.makeText(this, "Bài này thiếu uploaderId", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (receiverId.equals(myUid)) {
+            Toast.makeText(this, "Bạn đang là người đăng bài", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String receiverName = document.getUploaderFullName();
+        if (receiverName == null || receiverName.trim().isEmpty()) receiverName = document.getUploaderName();
+        if (receiverName == null || receiverName.trim().isEmpty()) receiverName = "Người đăng";
+
+        Intent intent = new Intent(this, ChatDetailActivity.class);
+        intent.putExtra("RECEIVER_ID", receiverId);
+        intent.putExtra("RECEIVER_NAME", receiverName);
+        startActivity(intent);
     }
+
+
 }

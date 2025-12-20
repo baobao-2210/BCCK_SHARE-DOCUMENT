@@ -20,6 +20,7 @@
             android:id="@+id/btn_back"
             android:layout_width="23dp"
             android:layout_height="34dp"
+
             android:contentDescription="Quay lại"
             android:src="@android:drawable/ic_menu_revert"
             app:layout_constraintBottom_toBottomOf="parent"
