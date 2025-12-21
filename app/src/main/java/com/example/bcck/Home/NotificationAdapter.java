@@ -1,6 +1,6 @@
 package com.example.bcck.Home;
 
-import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,88 +8,75 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bcck.R;
 
-import java.util.List;
+import java.util.ArrayList;
 
-public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
+public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.VH> {
 
-    private List<NotificationItem> notificationList;
-    private Context context;
-
-    public NotificationAdapter(Context context, List<NotificationItem> notificationList) {
-        this.context = context;
-        this.notificationList = notificationList;
+    public interface OnItemClick {
+        void onClick(NotificationItem item);
     }
 
-    // Interface để xử lý sự kiện click
-    public interface OnNotificationClickListener {
-        void onNotificationClick(int position);
-    }
-    private OnNotificationClickListener clickListener;
+    private final ArrayList<NotificationItem> list;
+    private final OnItemClick onItemClick;
 
-    public void setOnNotificationClickListener(OnNotificationClickListener listener) {
-        this.clickListener = listener;
+    public NotificationAdapter(ArrayList<NotificationItem> list, OnItemClick onItemClick) {
+        this.list = list;
+        this.onItemClick = onItemClick;
     }
 
     @NonNull
     @Override
-    public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
-        return new NotificationViewHolder(view);
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_notification, parent, false);
+        return new VH(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
-        NotificationItem item = notificationList.get(position);
+    public void onBindViewHolder(@NonNull VH h, int position) {
+        NotificationItem item = list.get(position);
 
-        holder.tvTitle.setText(item.getTitle());
-        holder.tvContent.setText(item.getContent());
-        holder.tvTime.setText(item.getTime());
-        holder.ivIcon.setImageResource(item.getIconResId());
+        h.tvTitle.setText(item.getTitle());
+        h.tvContent.setText(item.getContent());
+        h.tvTime.setText(item.getTime());
+        h.ivIcon.setImageResource(item.getIconResId());
 
-        // **Xử lý trạng thái Đã đọc/Chưa đọc**
+        // đọc / chưa đọc (in đậm nếu chưa đọc)
         if (item.isRead()) {
-            holder.ivUnreadDot.setVisibility(View.GONE);
-            holder.notificationItemLayout.setBackgroundResource(R.drawable.notification_read_bg);
+            h.tvTitle.setTypeface(null, Typeface.NORMAL);
         } else {
-            holder.ivUnreadDot.setVisibility(View.VISIBLE);
-            holder.notificationItemLayout.setBackgroundResource(R.drawable.notification_unread_bg);
-            // Màu nền nhẹ hơn nếu chưa đọc
+            h.tvTitle.setTypeface(null, Typeface.BOLD);
         }
 
-        // **Xử lý sự kiện Click**
-        holder.notificationItemLayout.setOnClickListener(v -> {
-            if (clickListener != null) {
-                clickListener.onNotificationClick(position);
-            }
+        // dot chưa đọc
+        h.unreadDot.setVisibility(item.isRead() ? View.INVISIBLE : View.VISIBLE);
+
+        h.itemView.setOnClickListener(v -> {
+            if (onItemClick != null) onItemClick.onClick(item);
         });
     }
 
     @Override
     public int getItemCount() {
-        return notificationList.size();
+        return list.size();
     }
 
-    // ViewHolder
-    public static class NotificationViewHolder extends RecyclerView.ViewHolder {
+    static class VH extends RecyclerView.ViewHolder {
         ImageView ivIcon;
         TextView tvTitle, tvContent, tvTime;
-        View ivUnreadDot;
-        ConstraintLayout notificationItemLayout;
+        View unreadDot;
 
-        public NotificationViewHolder(@NonNull View itemView) {
+        public VH(@NonNull View itemView) {
             super(itemView);
             ivIcon = itemView.findViewById(R.id.iv_icon);
             tvTitle = itemView.findViewById(R.id.tv_title);
             tvContent = itemView.findViewById(R.id.tv_content);
             tvTime = itemView.findViewById(R.id.tv_time);
-            ivUnreadDot = itemView.findViewById(R.id.iv_unread_dot);
-            notificationItemLayout = itemView.findViewById(R.id.notification_item_layout);
-
+            unreadDot = itemView.findViewById(R.id.iv_unread_dot);
         }
     }
 }

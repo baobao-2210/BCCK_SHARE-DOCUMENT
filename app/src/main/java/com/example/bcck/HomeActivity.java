@@ -1,8 +1,12 @@
 package com.example.bcck;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -13,6 +17,16 @@ import com.example.bcck.Home.HomeFragment;
 import com.example.bcck.Profile.ProfileFragment;
 import com.example.bcck.group.GroupFragment;
 import com.example.bcck.poster.DocumentFragment;
+
+// ✅ Firebase imports
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -28,21 +42,54 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
 
+        // ✅ 1) Xin quyền thông báo Android 13+ (API 33+)
+        requestNotificationPermissionIfNeeded();
+
+        // ✅ 2) Lấy FCM token và lưu lên Firestore (để Cloud Function gửi được)
+        saveFcmTokenToFirestore();
+
         // Khởi tạo views
         initViews();
 
         // Setup click listeners cho Bottom Navigation
         setupBottomNavigation();
 
-        // **CHỈNH SỬA TẠI ĐÂY:**
         if (savedInstanceState == null) {
-            // 1. Gọi hàm loadFragment để thực hiện Fragment Transaction
             loadFragment(new HomeFragment(), 0);
-
-            // 2. CẬP NHẬT GIAO DIỆN Bottom Nav (QUAN TRỌNG)
-            // Lệnh này đảm bảo icon Trang Chủ được tô sáng ngay từ đầu
             updateBottomNav(0);
         }
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        1001
+                );
+            }
+        }
+    }
+
+    private void saveFcmTokenToFirestore() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> {
+                    if (token == null || token.trim().isEmpty()) return;
+                    if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("createdAt", Timestamp.now());
+
+                    FirebaseFirestore.getInstance()
+                            .collection("users").document(uid)
+                            .collection("fcmTokens").document(token)
+                            .set(data, SetOptions.merge());
+                });
     }
 
     private void initViews() {
@@ -67,6 +114,7 @@ public class HomeActivity extends AppCompatActivity {
         navChatText = findViewById(R.id.navChatText);
         navProfileText = findViewById(R.id.navProfileText);
     }
+
     private void setupBottomNavigation() {
         // Tab Trang Chủ
         navDocs.setOnClickListener(v -> {
@@ -100,8 +148,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void loadFragment(Fragment fragment, int index) {
-
-        // Nếu fragment chưa từng được thêm, vẫn cho phép load
         if (currentFragmentIndex == index &&
                 getSupportFragmentManager().findFragmentById(R.id.fragmentContainer) != null) {
             return;
@@ -119,41 +165,27 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateBottomNav(int selectedIndex) {
-        // Reset tất cả về màu xám
         resetNavItem(navDocsIcon, navDocsText);
         resetNavItem(navGroupIcon, navGroupText);
         resetNavItem(navLibraryIcon, navLibraryText);
         resetNavItem(navChatIcon, navChatText);
         resetNavItem(navProfileIcon, navProfileText);
 
-        // Highlight item được chọn
         switch (selectedIndex) {
-            case 0:
-                highlightNavItem(navDocsIcon, navDocsText);
-                break;
-            case 1:
-                highlightNavItem(navGroupIcon, navGroupText);
-                break;
-            case 2:
-                highlightNavItem(navLibraryIcon, navLibraryText);
-                break;
-            case 3:
-                highlightNavItem(navChatIcon, navChatText);
-                break;
-            case 4:
-                highlightNavItem(navProfileIcon, navProfileText);
-                break;
+            case 0: highlightNavItem(navDocsIcon, navDocsText); break;
+            case 1: highlightNavItem(navGroupIcon, navGroupText); break;
+            case 2: highlightNavItem(navLibraryIcon, navLibraryText); break;
+            case 3: highlightNavItem(navChatIcon, navChatText); break;
+            case 4: highlightNavItem(navProfileIcon, navProfileText); break;
         }
     }
 
     private void resetNavItem(ImageView icon, TextView text) {
-        // Màu xám cho item không được chọn
         icon.setColorFilter(0xFF666666);
         text.setTextColor(0xFF666666);
     }
 
     private void highlightNavItem(ImageView icon, TextView text) {
-        // Màu tím cho item được chọn
         icon.setColorFilter(0xFF5B5FC7);
         text.setTextColor(0xFF5B5FC7);
     }

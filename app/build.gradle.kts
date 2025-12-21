@@ -13,7 +13,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,6 +25,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -33,7 +33,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -47,9 +46,13 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+
+    // ✅ THÊM 2 DÒNG NÀY CHO THÔNG BÁO TIN NHẮN
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-messaging-directboot")
+
+
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.cloudinary:cloudinary-android:2.5.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
-
-
 }

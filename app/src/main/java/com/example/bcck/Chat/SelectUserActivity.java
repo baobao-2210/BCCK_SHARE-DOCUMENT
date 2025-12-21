@@ -12,13 +12,9 @@ import com.example.bcck.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SelectUserActivity extends AppCompatActivity {
 
@@ -49,7 +45,7 @@ public class SelectUserActivity extends AppCompatActivity {
                     users.clear();
                     for (DocumentSnapshot d : snap.getDocuments()) {
                         String uid = d.getId();
-                        if (uid.equals(myUid)) continue;
+                        if (uid == null || uid.equals(myUid)) continue;
 
                         String fullName = d.getString("fullName");
                         String email = d.getString("email");
@@ -61,36 +57,25 @@ public class SelectUserActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e("USERS", "loadUsers fail", e));
     }
 
-    private String directChatId(String a, String b) {
-        return a.compareTo(b) < 0 ? a + "_" + b : b + "_" + a;
-    }
-
     private void openDirectChat(UserItem other) {
+        if (other == null || other.uid == null || other.uid.trim().isEmpty()) return;
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
         String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String chatId = directChatId(myUid, other.uid);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // không cho chat với chính mình
+        if (other.uid.equals(myUid)) return;
 
-        String title = (other.fullName != null && !other.fullName.trim().isEmpty())
-                ? other.fullName
-                : (other.email != null ? other.email : "Chat");
+        String receiverName =
+                (other.fullName != null && !other.fullName.trim().isEmpty())
+                        ? other.fullName.trim()
+                        : (other.email != null && !other.email.trim().isEmpty() ? other.email.trim() : "Người dùng");
 
-        Map<String, Object> chat = new HashMap<>();
-        chat.put("type", "direct");
-        chat.put("members", Arrays.asList(myUid, other.uid));
-        chat.put("title", title);
-        chat.put("lastMessage", "");
-        chat.put("lastSenderId", "");
-        chat.put("lastTime", com.google.firebase.Timestamp.now());
-
-        db.collection("chats").document(chatId)
-                .set(chat, SetOptions.merge())
-                .addOnSuccessListener(v -> {
-                    Intent i = new Intent(this, ChatDetailActivity.class);
-                    i.putExtra("chatId", chatId);
-                    i.putExtra("chatName", title);
-                    startActivity(i);
-                })
-                .addOnFailureListener(e -> Log.e("CHAT", "create chat fail", e));
+        // ✅ QUAN TRỌNG: chỉ gửi RECEIVER_ID/RECEIVER_NAME
+        // ChatDetailActivity sẽ tự findOrCreateDirectChat() theo stable chatId direct_uidA_uidB
+        Intent i = new Intent(this, ChatDetailActivity.class);
+        i.putExtra("RECEIVER_ID", other.uid);
+        i.putExtra("RECEIVER_NAME", receiverName);
+        startActivity(i);
     }
 }

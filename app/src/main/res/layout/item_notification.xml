@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginBottom="1dp"
     app:cardElevation="0dp">
 
@@ -12,16 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="@drawable/notification_read_bg"> <ImageView
-        android:id="@+id/iv_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="8dp"
-        android:background="@drawable/bg_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_onedrive"
-        android:contentDescription="Icon thông báo" />
+        android:background="@drawable/notification_read_bg">
+
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:background="@drawable/bg_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/ic_onedrive"
+            android:contentDescription="Icon thông báo" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -47,7 +49,7 @@
             app:layout_constraintTop_toBottomOf="@id/tv_title"
             app:layout_constraintStart_toStartOf="@id/tv_title"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:text="TS. Nguyễn Văn A đã đăng tài liệu mới cho môn Lập trình hướng đối tượng" />
+            tools:text="TS. Nguyễn Văn A đã đăng tài liệu mới..." />
 
         <TextView
             android:id="@+id/tv_time"
@@ -69,4 +71,5 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.cardview.widget.CardView>
