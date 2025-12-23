@@ -77,6 +77,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             tvContent = itemView.findViewById(R.id.tv_content);
             tvTime = itemView.findViewById(R.id.tv_time);
             unreadDot = itemView.findViewById(R.id.iv_unread_dot);
+            //id
         }
     }
 }
