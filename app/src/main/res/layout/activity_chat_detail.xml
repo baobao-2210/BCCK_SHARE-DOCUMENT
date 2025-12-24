@@ -39,6 +39,19 @@
             android:textStyle="bold"
             android:layout_marginStart="12dp"
             app:layout_constraintStart_toEndOf="@id/btnBackChatDetail"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteGroup"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:id="@+id/btnDeleteGroup"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:contentDescription="Delete group"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:visibility="gone"
+            app:tint="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />

@@ -16,7 +16,9 @@ import com.example.bcck.Chat.ChatDetailActivity;
 import com.example.bcck.R;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,13 +122,13 @@ public class CreateGroupActivity extends AppCompatActivity {
                         }
 
                         if (pending.decrementAndGet() == 0) {
-                            finalizeCreateGroup(db, groupName, memberUids, notFound);
+                            finalizeCreateGroup(db, groupName, memberUids, notFound, myUid);
                         }
                     })
                     .addOnFailureListener(e -> {
                         notFound.add(email);
                         if (pending.decrementAndGet() == 0) {
-                            finalizeCreateGroup(db, groupName, memberUids, notFound);
+                            finalizeCreateGroup(db, groupName, memberUids, notFound, myUid);
                         }
                     });
         }
@@ -136,7 +138,8 @@ public class CreateGroupActivity extends AppCompatActivity {
             FirebaseFirestore db,
             String groupName,
             Set<String> memberUids,
-            List<String> notFound
+            List<String> notFound,
+            String myUid
     ) {
         if (!notFound.isEmpty()) {
             Toast.makeText(
@@ -148,18 +151,42 @@ public class CreateGroupActivity extends AppCompatActivity {
         }
 
         String chatId = db.collection("chats").document().getId();
+        Timestamp now = Timestamp.now();
         Map<String, Object> data = new HashMap<>();
         data.put("type", "group");
         data.put("title", groupName);
         data.put("members", new ArrayList<>(memberUids));
-        data.put("createdAt", Timestamp.now());
+        data.put("createdAt", now);
         data.put("lastMessage", "");
-        data.put("lastTime", Timestamp.now());
+        data.put("lastTime", now);
         data.put("lastSenderId", "");
         data.put("lastSenderName", "");
 
-        db.collection("chats").document(chatId)
-                .set(data)
+        WriteBatch batch = db.batch();
+        DocumentReference chatRef = db.collection("chats").document(chatId);
+        batch.set(chatRef, data);
+
+        for (String uid : memberUids) {
+            if (uid == null || uid.trim().isEmpty()) continue;
+            if (uid.equals(myUid)) continue;
+
+            DocumentReference notiRef = db.collection("users")
+                    .document(uid)
+                    .collection("notifications")
+                    .document();
+
+            Map<String, Object> noti = new HashMap<>();
+            noti.put("type", "group_add");
+            noti.put("title", "Bạn đã được thêm vào nhóm");
+            noti.put("content", groupName);
+            noti.put("chatId", chatId);
+            noti.put("createdAt", now);
+            noti.put("isRead", false);
+
+            batch.set(notiRef, noti);
+        }
+
+        batch.commit()
                 .addOnSuccessListener(v -> {
                     Intent i = new Intent(this, ChatDetailActivity.class);
                     i.putExtra("chatId", chatId);

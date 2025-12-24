@@ -2,12 +2,15 @@ package com.example.bcck.Chat;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +28,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +55,7 @@ public class ChatDetailActivity extends AppCompatActivity {
     private String receiverName;
     private String chatName;
     private boolean isGroup;
+    private final List<String> groupMemberIds = new ArrayList<>();
 
     private ListenerRegistration msgListener;
     private boolean firstLoad = true;
@@ -80,11 +85,16 @@ public class ChatDetailActivity extends AppCompatActivity {
 
         TextView tvTitle = findViewById(R.id.tvChatDetailTitle);
         ImageView btnBack = findViewById(R.id.btnBackChatDetail);
+        ImageView btnDeleteGroup = findViewById(R.id.btnDeleteGroup);
         recyclerViewMessages = findViewById(R.id.recyclerViewMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
 
         btnBack.setOnClickListener(v -> finish());
+        if (btnDeleteGroup != null) {
+            btnDeleteGroup.setVisibility(isGroup ? View.VISIBLE : View.GONE);
+            btnDeleteGroup.setOnClickListener(v -> confirmDeleteGroup());
+        }
 
         setupRecyclerView();
 
@@ -97,7 +107,10 @@ public class ChatDetailActivity extends AppCompatActivity {
                     chatId = buildGroupId(title);
                 }
 
-                ensureGroupChatExists(chatId, title, () -> startListenMessages(chatId));
+                ensureGroupChatExists(chatId, title, () -> {
+                    loadGroupMembers(chatId);
+                    startListenMessages(chatId);
+                });
                 return;
             }
 
@@ -151,6 +164,16 @@ public class ChatDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Không tạo được nhóm chat: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     done.run();
+                });
+    }
+
+    private void loadGroupMembers(String id) {
+        if (id == null || id.trim().isEmpty()) return;
+        db.collection("chats").document(id).get()
+                .addOnSuccessListener(doc -> {
+                    List<String> members = (List<String>) doc.get("members");
+                    groupMemberIds.clear();
+                    if (members != null) groupMemberIds.addAll(members);
                 });
     }
 
@@ -351,12 +374,7 @@ public class ChatDetailActivity extends AppCompatActivity {
         etMessage.setText("");
 
         if (isGroup) {
-            WriteBatch batch = db.batch();
-            batch.set(msgRef, msg);
-            batch.set(chatRef, chatUpdate, SetOptions.merge());
-            batch.commit().addOnFailureListener(e ->
-                    Toast.makeText(this, "Gửi lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-            );
+            sendGroupMessage(chatRef, msgRef, msg, chatUpdate, messageText);
             return;
         }
 
@@ -389,6 +407,107 @@ public class ChatDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Gửi lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
             );
         });
+    }
+
+    private void sendGroupMessage(
+            DocumentReference chatRef,
+            DocumentReference msgRef,
+            Map<String, Object> msg,
+            Map<String, Object> chatUpdate,
+            String messageText
+    ) {
+        Runnable commit = () -> {
+            WriteBatch batch = db.batch();
+            batch.set(msgRef, msg);
+            batch.set(chatRef, chatUpdate, SetOptions.merge());
+
+            String title = (chatName != null && !chatName.trim().isEmpty()) ? chatName : "Nhóm chat";
+            String content = myName + ": " + messageText;
+
+            for (String uid : groupMemberIds) {
+                if (uid == null || uid.trim().isEmpty()) continue;
+                if (uid.equals(myUid)) continue;
+
+                DocumentReference notiRef = db.collection("users")
+                        .document(uid)
+                        .collection("notifications")
+                        .document();
+
+                Map<String, Object> noti = new HashMap<>();
+                noti.put("type", "group_message");
+                noti.put("title", title);
+                noti.put("content", content);
+                noti.put("chatId", chatId);
+                noti.put("createdAt", Timestamp.now());
+                noti.put("isRead", false);
+
+                batch.set(notiRef, noti);
+            }
+
+            batch.commit().addOnFailureListener(e ->
+                    Toast.makeText(this, "Gửi lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
+        };
+
+        if (!groupMemberIds.isEmpty()) {
+            commit.run();
+            return;
+        }
+
+        db.collection("chats").document(chatId).get()
+                .addOnSuccessListener(doc -> {
+                    List<String> members = (List<String>) doc.get("members");
+                    groupMemberIds.clear();
+                    if (members != null) groupMemberIds.addAll(members);
+                    commit.run();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Gửi lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private void confirmDeleteGroup() {
+        new AlertDialog.Builder(this)
+                .setTitle("Xóa nhóm chat")
+                .setMessage("Bạn có chắc muốn xóa nhóm này?")
+                .setPositiveButton("Xóa", (d, w) -> deleteGroupChat())
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void deleteGroupChat() {
+        if (chatId == null || chatId.trim().isEmpty()) return;
+        deleteGroupMessagesThenChat(chatId);
+    }
+
+    private void deleteGroupMessagesThenChat(@NonNull String id) {
+        db.collection("chats").document(id)
+                .collection("messages")
+                .limit(200)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    if (snap.isEmpty()) {
+                        db.collection("chats").document(id)
+                                .delete()
+                                .addOnSuccessListener(v -> finish())
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Xóa nhóm lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                );
+                        return;
+                    }
+
+                    WriteBatch batch = db.batch();
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        batch.delete(d.getReference());
+                    }
+                    batch.commit().addOnSuccessListener(v -> deleteGroupMessagesThenChat(id))
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Xóa nhóm lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Xóa nhóm lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
 
     @Override
