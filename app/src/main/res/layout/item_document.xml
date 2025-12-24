@@ -6,32 +6,43 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="3dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="4dp"
     android:backgroundTint="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="225dp"
+        android:layout_height="wrap_content"
         android:padding="16dp">
+
+        <!-- Accent strip (nhìn tách phần đẹp hơn) -->
+        <View
+            android:id="@+id/accentStrip"
+            android:layout_width="5dp"
+            android:layout_height="0dp"
+            android:background="#5B5FC7"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Avatar -->
         <androidx.cardview.widget.CardView
             android:id="@+id/authorAvatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:backgroundTint="#5B5FC7"
-            app:cardCornerRadius="20dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="12dp"
+            android:backgroundTint="#EEF2FF"
+            app:cardCornerRadius="21dp"
             app:cardElevation="0dp"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_dropbox"
-                app:tint="@android:color/white" />
+                app:tint="#5B5FC7" />
         </androidx.cardview.widget.CardView>
 
         <!-- Author Name -->
@@ -39,241 +50,266 @@
             android:id="@+id/tvAuthorName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="8dp"
             android:text="TS.Nguyễn Tấn Thuận"
-            android:textColor="#5B5FC7"
-            android:textSize="14sp"
+            android:textColor="#4F46E5"
+            android:textSize="13sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/authorAvatar"
-            app:layout_constraintEnd_toStartOf="@id/btnMore"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@id/authorAvatar"
-            app:layout_constraintTop_toTopOf="@id/authorAvatar" />
+            app:layout_constraintEnd_toStartOf="@id/btnMore"
+            app:layout_constraintTop_toTopOf="@id/authorAvatar"
+            app:layout_constraintBottom_toBottomOf="@id/authorAvatar" />
 
         <!-- More Button -->
-
-        <!-- Document Title -->
         <ImageView
             android:id="@+id/btnMore"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:rotation="45"
-            android:src="@android:drawable/ic_input_add"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_more"
+            app:tint="#111827"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="#000000" />
+            android:contentDescription="More" />
 
+        <!-- Document Title -->
         <TextView
             android:id="@+id/tvDocTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="12dp"
             android:text="Lập trình hướng đối tượng chương I"
-            android:textColor="#000000"
+            android:textColor="#111827"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
             app:layout_constraintEnd_toStartOf="@id/docTypeBadge"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/authorAvatar" />
 
-        <!-- Document Type Badge (PDF/PPT) -->
+        <!-- Badge PDF -->
         <TextView
             android:id="@+id/docTypeBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#FFE5E0"
-            android:paddingStart="12dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="4dp"
+            android:layout_marginStart="8dp"
+            android:background="#FFF1F2"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
             android:text="PDF"
-            android:textColor="#FF5722"
+            android:textColor="#E11D48"
             android:textSize="12sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/tvDocTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvDocTitle" />
 
-        <!-- Subject Tag -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/subjectLayout1"
-            android:layout_width="wrap_content"
+        <!-- Tags row (icon có nền nhẹ) -->
+        <LinearLayout
+            android:id="@+id/tagRow1"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvDocTitle">
 
-            <ImageView
-                android:id="@+id/iconSubject1"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@android:drawable/ic_menu_agenda"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#4CAF50" />
+            <androidx.cardview.widget.CardView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:backgroundTint="#ECFDF5"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_agenda"
+                    app:tint="#16A34A" />
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/tvSubject1"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:text="Lập trình hướng đối tượng"
-                android:textColor="#666666"
+                android:textColor="#6B7280"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/iconSubject1"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_weight="1"/>
+        </LinearLayout>
 
-        <!-- Teacher Tag -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/teacherLayout"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/tagRow2"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/subjectLayout1">
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tagRow1">
 
-            <ImageView
-                android:id="@+id/iconTeacher"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#FF9800" />
+            <androidx.cardview.widget.CardView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:backgroundTint="#FFF7ED"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    app:tint="#F97316" />
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/tvTeacher"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:text="T.S Nguyễn Quốc Hùng"
-                android:textColor="#666666"
+                android:textColor="#6B7280"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/iconTeacher"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_weight="1"/>
+        </LinearLayout>
 
-        <!-- Major Tag -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/majorLayout"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/tagRow3"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/teacherLayout">
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tagRow2">
 
-            <ImageView
-                android:id="@+id/iconMajor"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@android:drawable/ic_menu_info_details"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#2196F3" />
+            <androidx.cardview.widget.CardView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:backgroundTint="#EFF6FF"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_info_details"
+                    app:tint="#2563EB" />
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/tvMajor"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:text="Công nghệ thông tin"
-                android:textColor="#666666"
+                android:textColor="#6B7280"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/iconMajor"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_weight="1"/>
+        </LinearLayout>
 
-        <!-- Stats (Downloads, Likes, Rating) -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/statsLayout"
-            android:layout_width="wrap_content"
+        <!-- Divider -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="#EEF2F7"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tagRow3"/>
+
+        <!-- Stats -->
+        <LinearLayout
+            android:id="@+id/statsRow"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/majorLayout">
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toEndOf="@id/accentStrip"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider">
 
             <ImageView
-                android:id="@+id/iconDownload"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:src="@android:drawable/stat_sys_download"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#666666" />
+                app:tint="#9CA3AF"/>
 
             <TextView
                 android:id="@+id/tvDownloads"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="6dp"
                 android:text="0"
-                android:textColor="#666666"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/iconDownload"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textColor="#6B7280"
+                android:textSize="12sp"/>
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="1dp"/>
 
             <ImageView
-                android:id="@+id/iconLike"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:layout_marginStart="16dp"
                 android:src="@android:drawable/btn_star_big_on"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tvDownloads"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#666666" />
+                app:tint="#9CA3AF"/>
 
             <TextView
                 android:id="@+id/tvLikes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="6dp"
                 android:text="0"
-                android:textColor="#666666"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/iconLike"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textColor="#6B7280"
+                android:textSize="12sp"/>
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="1dp"/>
 
             <ImageView
-                android:id="@+id/iconRating"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:layout_marginStart="16dp"
                 android:src="@android:drawable/btn_star"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tvLikes"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#FFC107" />
+                app:tint="#F59E0B"/>
 
             <TextView
                 android:id="@+id/tvRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="6dp"
                 android:text="0.0"
-                android:textColor="#FFC107"
+                android:textColor="#F59E0B"
                 android:textSize="12sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/iconRating"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:textStyle="bold"/>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
