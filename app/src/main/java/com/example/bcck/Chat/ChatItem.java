@@ -6,6 +6,7 @@ public class ChatItem {
     private String lastMessage;
     private String time;
     private String avatarText;
+    private String avatarUrl;
     private boolean isGroup;
 
     // dùng để biết user bên kia (direct chat)
@@ -14,12 +15,13 @@ public class ChatItem {
     public ChatItem() {}
 
     public ChatItem(String chatId, String chatName, String lastMessage, String time,
-                    String avatarText, boolean isGroup, String otherUserId) {
+                    String avatarText, String avatarUrl, boolean isGroup, String otherUserId) {
         this.chatId = chatId;
         this.chatName = chatName;
         this.lastMessage = lastMessage;
         this.time = time;
         this.avatarText = avatarText;
+        this.avatarUrl = avatarUrl;
         this.isGroup = isGroup;
         this.otherUserId = otherUserId;
     }
@@ -29,9 +31,11 @@ public class ChatItem {
     public String getLastMessage() { return lastMessage; }
     public String getTime() { return time; }
     public String getAvatarText() { return avatarText; }
+    public String getAvatarUrl() { return avatarUrl; }
     public boolean isGroup() { return isGroup; }
     public String getOtherUserId() { return otherUserId; }
 
     public void setChatName(String chatName) { this.chatName = chatName; }
     public void setAvatarText(String avatarText) { this.avatarText = avatarText; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 }

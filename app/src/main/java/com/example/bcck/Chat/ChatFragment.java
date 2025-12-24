@@ -152,6 +152,7 @@ public class ChatFragment extends Fragment {
                                 lastMessage,
                                 time,
                                 makeAvatarText(showName),
+                                null,
                                 isGroup,
                                 otherUserId
                         ));
@@ -188,6 +189,7 @@ public class ChatFragment extends Fragment {
 
                         item.setChatName(display);
                         item.setAvatarText(makeAvatarText(display));
+                        item.setAvatarUrl(userDoc.getString("avatarUrl"));
 
                         applyCurrentFilter(); // để list đang filter vẫn update đúng
                     });
