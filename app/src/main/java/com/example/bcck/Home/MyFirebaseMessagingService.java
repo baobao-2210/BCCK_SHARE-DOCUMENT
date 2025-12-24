@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String CHANNEL_ID = "msg_channel";
+    private static final String CHANNEL_ID = "msg_channel"; 
 
     @Override
     public void onNewToken(String token) {
