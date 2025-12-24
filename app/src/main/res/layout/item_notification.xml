@@ -15,6 +15,7 @@
         android:id="@+id/notification_item_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#F8F5F5"
         android:padding="14dp">
 
         <!-- Icon -->
@@ -22,9 +23,9 @@
             android:id="@+id/iv_icon"
             android:layout_width="42dp"
             android:layout_height="42dp"
-            android:padding="9dp"
             android:background="@android:color/transparent"
             android:contentDescription="Icon thông báo"
+            android:padding="9dp"
 
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -37,15 +38,15 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Tài liệu mới"
             android:textColor="#111111"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:maxLines="1"
-            android:ellipsize="end"
+            app:layout_constraintEnd_toStartOf="@id/iv_unread_dot"
             app:layout_constraintStart_toEndOf="@id/iv_icon"
-            app:layout_constraintTop_toTopOf="@id/iv_icon"
-            app:layout_constraintEnd_toStartOf="@id/iv_unread_dot" />
+            app:layout_constraintTop_toTopOf="@id/iv_icon" />
 
         <!-- Content -->
         <TextView
@@ -53,14 +54,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="2"
             android:text="TS. Nguyễn Văn A đã đăng tài liệu mới..."
             android:textColor="#444444"
             android:textSize="13.5sp"
-            android:maxLines="2"
-            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tv_title"
-            app:layout_constraintTop_toBottomOf="@id/tv_title"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
         <!-- Time -->
         <TextView
@@ -79,7 +80,7 @@
             android:id="@+id/iv_unread_dot"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:background="#3F51B5"
+            android:background="#02082A"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -88,9 +89,9 @@
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
-            android:background="#EEEEEE"
-            app:layout_constraintStart_toStartOf="parent"
+            android:background="#020823"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_time" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
