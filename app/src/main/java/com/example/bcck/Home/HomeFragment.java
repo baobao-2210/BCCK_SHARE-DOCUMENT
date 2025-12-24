@@ -152,20 +152,22 @@ public class HomeFragment extends Fragment {
     private void setupFilterButtons() {
         btnAll.setOnClickListener(v -> {
             selectFilterButton(btnAll);
+            // "Tất cả": Hiển thị mọi bài, sắp xếp mặc định (ví dụ theo ngày)
             loadTopDocuments(DocumentSort.ALL);
         });
 
         btnPopular.setOnClickListener(v -> {
             selectFilterButton(btnPopular);
+            // "Phổ biến": Lấy bài nhiều like nhất
             loadTopDocuments(DocumentSort.POPULAR);
         });
 
         btnNewest.setOnClickListener(v -> {
             selectFilterButton(btnNewest);
+            // "Mới nhất": Lấy bài vừa đăng xong
             loadTopDocuments(DocumentSort.NEWEST);
         });
     }
-
     private void selectFilterButton(Button selectedButton) {
         btnAll.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray, null));
         btnAll.setTextColor(0xFF000000);
@@ -230,25 +232,62 @@ public class HomeFragment extends Fragment {
     }
 
     // --- CẬP NHẬT HÀM NÀY: Lưu dữ liệu vào cả 2 danh sách ---
+    // --- CẬP NHẬT HÀM NÀY: Lưu dữ liệu vào cả 2 danh sách ---
     private void loadTopDocuments(@NonNull DocumentSort sort) {
-        // Reset ô tìm kiếm khi đổi bộ lọc (Sort)
+        // Reset ô tìm kiếm khi đổi bộ lọc
         if (searchView != null) {
             searchView.setQuery("", false);
             searchView.clearFocus();
         }
 
-        documentRepository.loadTopDocuments(sort, 30, new FirestoreDocumentRepository.LoadDocumentsCallback() {
+        // Gọi Repository lấy dữ liệu thô về (Lấy 50 bài để có đủ dữ liệu lọc)
+        documentRepository.loadTopDocuments(DocumentSort.ALL, 50, new FirestoreDocumentRepository.LoadDocumentsCallback() {
             @Override
             public void onSuccess(@NonNull List<Document> documents) {
                 if (!isAdded()) return;
 
-                // 1. Cập nhật danh sách hiển thị
-                homeDocuments.clear();
-                homeDocuments.addAll(documents);
-
-                // 2. Cập nhật danh sách gốc (Backup) để dùng cho tìm kiếm
+                // 1. Lưu danh sách gốc để Backup
                 originalDocuments.clear();
                 originalDocuments.addAll(documents);
+
+                // 2. Xử lý lọc theo từng loại nút bấm
+                homeDocuments.clear();
+
+                if (sort == DocumentSort.POPULAR) {
+                    // --- XỬ LÝ NÚT PHỔ BIẾN ---
+                    // Sắp xếp giảm dần theo Like
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        documents.sort((o1, o2) -> Integer.compare(o2.getLikes(), o1.getLikes()));
+                    } else {
+                        java.util.Collections.sort(documents, (o1, o2) -> Integer.compare(o2.getLikes(), o1.getLikes()));
+                    }
+
+                    // SỬA: Lấy 10 bài đầu tiên (thay vì 5)
+                    int limit = Math.min(documents.size(), 10);
+                    for (int i = 0; i < limit; i++) {
+                        homeDocuments.add(documents.get(i));
+                    }
+                }
+                else if (sort == DocumentSort.NEWEST) {
+                    // --- XỬ LÝ NÚT MỚI NHẤT ---
+                    // Sắp xếp giảm dần theo thời gian (Timestamp)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        documents.sort((o1, o2) -> Long.compare(o2.getUploadTimestamp(), o1.getUploadTimestamp()));
+                    } else {
+                        java.util.Collections.sort(documents, (o1, o2) -> Long.compare(o2.getUploadTimestamp(), o1.getUploadTimestamp()));
+                    }
+
+                    // SỬA: Chỉ lấy 10 bài mới nhất
+                    int limit = Math.min(documents.size(), 10);
+                    for (int i = 0; i < limit; i++) {
+                        homeDocuments.add(documents.get(i));
+                    }
+                }
+                else {
+                    // --- XỬ LÝ NÚT TẤT CẢ (Mặc định) ---
+                    // Hiển thị toàn bộ danh sách lấy được (50 bài)
+                    homeDocuments.addAll(documents);
+                }
 
                 documentAdapter.notifyDataSetChanged();
             }
@@ -260,6 +299,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
 
     private void openDocumentDetail(@NonNull Document document) {
         Intent intent = new Intent(getActivity(), DocumentDetailActivity.class);

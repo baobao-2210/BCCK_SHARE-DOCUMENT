@@ -42,11 +42,14 @@ public class FirestoreDocumentRepository {
                 query = query.orderBy("downloads", Query.Direction.DESCENDING);
                 break;
             case NEWEST:
+                // Sắp xếp theo thời gian giảm dần (Mới nhất lên đầu)
                 query = query.orderBy("uploadTimestamp", Query.Direction.DESCENDING);
                 break;
             case ALL:
             default:
-                query = query.orderBy("title", Query.Direction.ASCENDING);
+                // SỬA: Đừng sort theo title nữa nếu dữ liệu không chuẩn.
+                // Hãy để mặc định hoặc sort theo ngày để lấy được mọi bài.
+                query = query.orderBy("uploadTimestamp", Query.Direction.DESCENDING);
                 break;
         }
 
