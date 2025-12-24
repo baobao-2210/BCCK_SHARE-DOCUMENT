@@ -18,15 +18,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 public class ChatDetailActivity extends AppCompatActivity {
 
@@ -46,6 +49,8 @@ public class ChatDetailActivity extends AppCompatActivity {
     private String chatId;
     private String receiverId;
     private String receiverName;
+    private String chatName;
+    private boolean isGroup;
 
     private ListenerRegistration msgListener;
     private boolean firstLoad = true;
@@ -68,6 +73,8 @@ public class ChatDetailActivity extends AppCompatActivity {
 
         // extras
         chatId = getIntent().getStringExtra("chatId");
+        chatName = getIntent().getStringExtra("chatName");
+        isGroup = getIntent().getBooleanExtra("isGroup", false);
         receiverId = getIntent().getStringExtra("RECEIVER_ID");
         receiverName = getIntent().getStringExtra("RECEIVER_NAME");
 
@@ -82,6 +89,18 @@ public class ChatDetailActivity extends AppCompatActivity {
         setupRecyclerView();
 
         loadMyName(() -> {
+            if (isGroup) {
+                String title = (chatName != null && !chatName.trim().isEmpty()) ? chatName : "Nhóm chat";
+                tvTitle.setText(title);
+
+                if (chatId == null || chatId.trim().isEmpty()) {
+                    chatId = buildGroupId(title);
+                }
+
+                ensureGroupChatExists(chatId, title, () -> startListenMessages(chatId));
+                return;
+            }
+
             // ưu tiên: nếu có chatId thì mở luôn
             if (chatId != null && !chatId.trim().isEmpty()) {
                 String chatName = getIntent().getStringExtra("chatName");
@@ -105,6 +124,34 @@ public class ChatDetailActivity extends AppCompatActivity {
         });
 
         btnSend.setOnClickListener(v -> sendMessage());
+    }
+
+    private String buildGroupId(String groupName) {
+        String base = groupName == null ? "" : groupName.trim().toLowerCase(Locale.ROOT);
+        return "group_" + Integer.toHexString(base.hashCode());
+    }
+
+    private void ensureGroupChatExists(String id, String title, Runnable done) {
+        if (id == null || id.trim().isEmpty()) {
+            done.run();
+            return;
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("type", "group");
+        if (title != null) data.put("title", title);
+        data.put("createdAt", Timestamp.now());
+        if (myUid != null && !myUid.trim().isEmpty()) {
+            data.put("members", FieldValue.arrayUnion(myUid));
+        }
+
+        db.collection("chats").document(id)
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(v -> done.run())
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Không tạo được nhóm chat: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    done.run();
+                });
     }
 
     private void setupRecyclerView() {
@@ -302,6 +349,16 @@ public class ChatDetailActivity extends AppCompatActivity {
 
         // UX: clear ngay
         etMessage.setText("");
+
+        if (isGroup) {
+            WriteBatch batch = db.batch();
+            batch.set(msgRef, msg);
+            batch.set(chatRef, chatUpdate, SetOptions.merge());
+            batch.commit().addOnFailureListener(e ->
+                    Toast.makeText(this, "Gửi lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
+            return;
+        }
 
         // đảm bảo có receiverId rồi mới tạo notification
         resolveReceiverIdFromChatIfNeeded(chatId, () -> {

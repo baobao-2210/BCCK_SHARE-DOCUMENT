@@ -17,9 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.bcck.Chat.ChatActivity;
+import com.example.bcck.Chat.ChatDetailActivity;
 import com.example.bcck.R;
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +68,14 @@ public class GroupFragment extends Fragment {
 
         groupAdapter = new GroupAdapter(filteredGroupList, group -> {
             // Khi nhấn nút Chat → Chuyển sang ChatActivity
-            Intent intent = new Intent(getActivity(), ChatActivity.class);
+            Intent intent = new Intent(getActivity(), ChatDetailActivity.class);
+            String chatId = group.getGroupId();
+            if (chatId == null || chatId.trim().isEmpty()) {
+                chatId = buildGroupId(group.getGroupName());
+            }
+            intent.putExtra("chatId", chatId);
+            intent.putExtra("chatName", group.getGroupName());
+            intent.putExtra("isGroup", true);
             intent.putExtra("groupName", group.getGroupName());
             intent.putExtra("memberCount", group.getMemberCount());
             startActivity(intent);
@@ -89,8 +99,8 @@ public class GroupFragment extends Fragment {
         });
 
         addIcon.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Tạo nhóm mới", Toast.LENGTH_SHORT).show();
-            // TODO: Mở màn hình tạo nhóm
+            Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -126,23 +136,39 @@ public class GroupFragment extends Fragment {
     }
 
     private void loadGroupData() {
-        // Dữ liệu mẫu
-        groupList.clear();
-        groupList.add(new Group("công nghệ phần mềm", 38));
-        groupList.add(new Group("lập trình di động", 38));
-        groupList.add(new Group("cơ sở dữ liệu", 25));
-        groupList.add(new Group("mạng máy tính", 42));
-        groupList.add(new Group("trí tuệ nhân tạo", 31));
-
-        filteredGroupList.clear();
-        filteredGroupList.addAll(groupList);
-        groupAdapter.notifyDataSetChanged();
+        loadMyGroups();
     }
 
     private void loadMyGroups() {
-        // Load nhóm của tôi
-        Toast.makeText(getContext(), "Hiển thị nhóm của tôi", Toast.LENGTH_SHORT).show();
-        loadGroupData();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        FirebaseFirestore.getInstance()
+                .collection("chats")
+                .whereEqualTo("type", "group")
+                .whereArrayContains("members", myUid)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    groupList.clear();
+
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        String id = d.getId();
+                        String title = d.getString("title");
+                        if (title == null || title.trim().isEmpty()) title = "Nhóm chat";
+
+                        List<String> members = (List<String>) d.get("members");
+                        int memberCount = members != null ? members.size() : 0;
+
+                        groupList.add(new Group(id, title, memberCount));
+                    }
+
+                    filteredGroupList.clear();
+                    filteredGroupList.addAll(groupList);
+                    groupAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Lỗi load nhóm: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void loadDiscoverGroups() {
@@ -167,5 +193,10 @@ public class GroupFragment extends Fragment {
 
         groupAdapter.notifyDataSetChanged();
 
+    }
+
+    private String buildGroupId(String groupName) {
+        String base = groupName == null ? "" : groupName.trim().toLowerCase(Locale.ROOT);
+        return "group_" + Integer.toHexString(base.hashCode());
     }
 }
