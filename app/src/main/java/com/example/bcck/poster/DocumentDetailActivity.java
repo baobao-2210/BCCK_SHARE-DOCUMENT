@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.bcck.Chat.ChatDetailActivity;
 import com.example.bcck.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,19 +42,22 @@ public class DocumentDetailActivity extends AppCompatActivity {
 
         initViewsAndData(document);
     }
-
     private void initViewsAndData(Document document) {
+        // 1. Ánh xạ Views
         TextView tvAuthorName = findViewById(R.id.tvAuthorName);
-        TextView tvDocumentTitle = findViewById(R.id.tvDocumentTitle);
+        TextView tvDocumentTitle = findViewById(R.id.tvDocumentTitle); // Kiểm tra lại ID bên XML xem là tvDocumentTitle hay tvDocTitle nhé
         TextView tvFileType = findViewById(R.id.tvFileType);
         TextView tvSubject = findViewById(R.id.tvSubject);
         TextView tvTeacher = findViewById(R.id.tvTeacher);
-        TextView tvCourse = findViewById(R.id.tvCourse);
+        TextView tvCourse = findViewById(R.id.tvCourse); // Có thể bên XML bạn đặt là tvMajor
         TextView tvYear = findViewById(R.id.tvYear);
         TextView tvUploader = findViewById(R.id.tvUploader);
         TextView tvUploadDate = findViewById(R.id.tvUploadDate);
+
+        // --- CÁC PHẦN THỐNG KÊ ---
         TextView tvDownloads = findViewById(R.id.tvDownloads);
         TextView tvRating = findViewById(R.id.tvRating);
+        TextView tvLikes = findViewById(R.id.tvLikes); // <--- BẠN THIẾU DÒNG NÀY
 
         Button btnDownload = findViewById(R.id.btnDownload);
         Button btnShare = findViewById(R.id.btnShare);
@@ -60,6 +65,7 @@ public class DocumentDetailActivity extends AppCompatActivity {
         Button btnMessage = findViewById(R.id.btnMessage);
         ImageView btnClose = findViewById(R.id.btnClose);
 
+        // 2. Đổ dữ liệu
         tvAuthorName.setText(safe(document.getAuthorName()));
         tvDocumentTitle.setText(safe(document.getTitle()));
         tvFileType.setText(safe(document.getDocType()));
@@ -73,14 +79,28 @@ public class DocumentDetailActivity extends AppCompatActivity {
                 .format(new Date(document.getUploadTimestamp()));
         tvUploadDate.setText("Ngày đăng: " + dateString);
 
+        // --- HIỂN THỊ SỐ LIỆU ---
         tvDownloads.setText(String.valueOf(document.getDownloads()));
         tvRating.setText(String.format(Locale.getDefault(), "%.1f", document.getRating()));
 
+        // <--- BẠN THIẾU DÒNG NÀY:
+        tvLikes.setText(String.valueOf(document.getLikes()));
+
+        // 3. Sự kiện Click
         btnDownload.setOnClickListener(v -> handleDownload(document));
         btnShare.setOnClickListener(v -> handleShare(document));
         btnPreview.setOnClickListener(v -> handlePreview(document));
         btnMessage.setOnClickListener(v -> handleMessage(document));
         btnClose.setOnClickListener(v -> finish());
+
+        if (tvLikes != null) {
+            tvLikes.setOnClickListener(v -> handleLike(document));
+        }
+
+        // 2. Bấm vào Rating -> Hiện bảng đánh giá
+        if (tvRating != null) {
+            tvRating.setOnClickListener(v -> showRatingDialog(document));
+        }
     }
 
     private String safe(String s) {
@@ -129,6 +149,7 @@ public class DocumentDetailActivity extends AppCompatActivity {
             if (manager != null) {
                 manager.enqueue(request);
                 Toast.makeText(this, "Đang tải xuống: " + fileName, Toast.LENGTH_SHORT).show();
+                updateDownloadCount(document);
             }
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi tải xuống: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -193,6 +214,113 @@ public class DocumentDetailActivity extends AppCompatActivity {
         intent.putExtra("RECEIVER_NAME", receiverName);
         startActivity(intent);
     }
+    private void updateDownloadCount(Document document) {
+        if (document.getDocId() == null) return;
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // 1. Gửi lệnh lên Firestore: Tăng field "downloads" thêm 1
+        db.collection("DocumentID").document(document.getDocId())
+                .update("downloads", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> {
+                    // 2. Nếu thành công, cập nhật giao diện ngay lập tức
+                    int newCount = document.getDownloads() + 1;
+                    document.setDownloads(newCount); // Cập nhật biến cục bộ
+
+                    TextView tvDownloads = findViewById(R.id.tvDownloads);
+                    tvDownloads.setText(String.valueOf(newCount));
+
+                    // (Tùy chọn) Toast báo thành công
+                    // Toast.makeText(this, "Đã cập nhật lượt tải!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi cập nhật: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    private void handleLike(Document document) {
+        if (document.getDocId() == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Gửi lệnh tăng 1 like lên Server
+        db.collection("DocumentID").document(document.getDocId())
+                .update("likes", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> {
+                    // Cập nhật giao diện ngay lập tức
+                    int newLike = document.getLikes() + 1;
+                    document.setLikes(newLike);
+
+                    TextView tvLikes = findViewById(R.id.tvLikes);
+                    if (tvLikes != null) {
+                        tvLikes.setText(String.valueOf(newLike));
+                    }
+                    Toast.makeText(this, "Đã thích tài liệu!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+    private void showRatingDialog(Document document) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Đánh giá tài liệu");
+
+        // Tạo Layout chứa thanh RatingBar
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        android.widget.RatingBar ratingBar = new android.widget.RatingBar(this);
+        ratingBar.setNumStars(5);
+        ratingBar.setStepSize(1);
+        ratingBar.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
+        // Set layout gravity center cho đẹp
+        android.widget.LinearLayout.LayoutParams params = (android.widget.LinearLayout.LayoutParams) ratingBar.getLayoutParams();
+        params.gravity = android.view.Gravity.CENTER;
+        ratingBar.setLayoutParams(params);
+
+        layout.addView(ratingBar);
+        builder.setView(layout);
+
+        builder.setPositiveButton("Gửi đánh giá", (dialog, which) -> {
+            float userRating = ratingBar.getRating();
+            if (userRating > 0) {
+                updateRating(document, userRating);
+            }
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+    private void updateRating(Document document, float newRatingByUser) {
+        if (document.getDocId() == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // 1. Tính toán điểm trung bình mới (Local)
+        float currentRating = document.getRating();
+        int currentCount = document.getRatingCount();
+
+        // Công thức: (Điểm cũ * số lượt cũ + Điểm mới) / (Số lượt cũ + 1)
+        float newAverage = ((currentRating * currentCount) + newRatingByUser) / (currentCount + 1);
+        int newCount = currentCount + 1;
+
+        // 2. Cập nhật lên Firestore
+        db.collection("DocumentID").document(document.getDocId())
+                .update(
+                        "rating", newAverage,
+                        "ratingCount", newCount
+                )
+                .addOnSuccessListener(aVoid -> {
+                    // 3. Cập nhật giao diện
+                    document.setRating(newAverage);
+                    document.setRatingCount(newCount);
+
+                    TextView tvRating = findViewById(R.id.tvRating);
+                    if (tvRating != null) {
+                        tvRating.setText(String.format(Locale.getDefault(), "%.1f", newAverage));
+                    }
+                    Toast.makeText(this, "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
 }

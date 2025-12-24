@@ -166,6 +166,7 @@ public class DocumentFragment extends Fragment {
                         Document doc = docSnap.toObject(Document.class);
 
                         if (doc != null) {
+                            doc.setDocId(docSnap.getId());
                             documentList.add(doc);
                         }
                     }

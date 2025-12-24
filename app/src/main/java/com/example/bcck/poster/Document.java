@@ -13,6 +13,7 @@ public class Document implements Serializable {
     private int downloads;
     private int likes;
     private float rating;
+    private int ratingCount;
 
     private String uploaderName;
     private String year;
@@ -20,7 +21,7 @@ public class Document implements Serializable {
     private String fileUrl;
 
     private String uploaderId;  // ID người đăng
-
+    private String docId;
     public Document() {
         // Firestore bắt buộc cần constructor rỗng
     }
@@ -85,4 +86,8 @@ public class Document implements Serializable {
 
     public void setDescription(String string) {
     }
+    public String getDocId() { return docId; }
+    public void setDocId(String docId) { this.docId = docId; }
+    public int getRatingCount() { return ratingCount; }
+    public void setRatingCount(int ratingCount) { this.ratingCount = ratingCount; }
 }
