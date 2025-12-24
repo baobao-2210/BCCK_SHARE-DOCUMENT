@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="14dp">
+
+    <ImageView
+        android:id="@+id/onedrive1Icon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_onedrive"
+        android:contentDescription="OneDrive"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/onedrive1Title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="OneDrive"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:textColor="#111827"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@id/onedrive1Icon"
+        app:layout_constraintTop_toTopOf="@id/onedrive1Icon"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/onedrive1Info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="5 items • 184.3 GB"
+        android:textSize="12sp"
+        android:textColor="#6B7280"
+        android:layout_marginTop="2dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@id/onedrive1Icon"
+        app:layout_constraintTop_toBottomOf="@id/onedrive1Title"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/onedrive1Progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="6dp"
+        android:layout_marginTop="12dp"
+        android:progress="31"
+        android:progressTint="#0078D4"
+        android:indeterminate="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/onedrive1Info"/>
+
+    <TextView
+        android:id="@+id/onedrive1Percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="31%"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:textColor="#0078D4"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/onedrive1Progress"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

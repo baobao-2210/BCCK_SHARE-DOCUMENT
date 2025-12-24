@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="14dp">
+
+    <ImageView
+        android:id="@+id/gdriveIcon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_gdrive"
+        android:contentDescription="Google Drive"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/gdriveEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Google Drive"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:textColor="#111827"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@id/gdriveIcon"
+        app:layout_constraintTop_toTopOf="@id/gdriveIcon"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/gdriveInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="4 items • 13.5 GB"
+        android:textSize="12sp"
+        android:textColor="#6B7280"
+        android:layout_marginTop="2dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@id/gdriveIcon"
+        app:layout_constraintTop_toBottomOf="@id/gdriveEmail"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/gdriveProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="6dp"
+        android:layout_marginTop="12dp"
+        android:progress="52"
+        android:progressTint="#4285F4"
+        android:indeterminate="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gdriveInfo"/>
+
+    <TextView
+        android:id="@+id/gdrivePercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="52%"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:textColor="#4285F4"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gdriveProgress"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

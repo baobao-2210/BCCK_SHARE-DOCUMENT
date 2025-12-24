@@ -2,132 +2,140 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F6FB">
+    android:background="#F6F7FB">
 
-    <!-- Header với Back, Title và Icons -->
+    <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLayout"
         android:layout_width="0dp"
-        android:layout_height="72dp"
+        android:layout_height="92dp"
         android:background="@drawable/bg_chat_header"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Back Button -->
+        <!-- Back -->
         <ImageView
             android:id="@+id/btnBack"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_chat_icon"
+            android:padding="10dp"
             android:src="@android:drawable/ic_menu_revert"
             android:contentDescription="Back"
-            android:padding="4dp"
-            android:background="@drawable/bg_chat_icon"
             app:tint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Title "Tin Nhắn" -->
+        <!-- Title + subtitle -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Tin Nhắn"
+            android:text="Tin nhắn"
             android:textColor="@android:color/white"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
             app:layout_constraintStart_toEndOf="@id/btnBack"
+            app:layout_constraintTop_toTopOf="@id/btnBack"
             app:layout_constraintEnd_toStartOf="@id/actionRow"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            tools:text="Tin nhắn" />
 
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Kết nối và chia sẻ nhanh"
+            android:textColor="#DCE3FF"
+            android:textSize="13sp"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/btnBack"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintEnd_toStartOf="@id/actionRow"
+            tools:ignore="HardcodedText" />
+
+        <!-- Actions -->
         <LinearLayout
             android:id="@+id/actionRow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="@id/btnBack"
+            app:layout_constraintBottom_toBottomOf="@id/btnBack">
 
-            <!-- Settings Icon -->
             <ImageView
                 android:id="@+id/iconSettings"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
                 android:background="@drawable/bg_chat_icon"
-                android:contentDescription="Settings"
-                android:padding="8dp"
+                android:padding="10dp"
                 android:src="@drawable/ic_message"
+                android:contentDescription="Settings"
                 app:tint="@android:color/white" />
 
-            <!-- Notification Icon -->
             <ImageView
                 android:id="@+id/iconNotification"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
                 android:background="@drawable/bg_chat_icon"
-                android:contentDescription="Notification"
-                android:padding="8dp"
+                android:padding="10dp"
                 android:src="@android:drawable/ic_popup_reminder"
+                android:contentDescription="Notification"
                 app:tint="@android:color/white" />
 
-            <!-- Profile Icon -->
             <ImageView
                 android:id="@+id/iconProfile"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"
                 android:background="@drawable/bg_chat_icon"
-                android:contentDescription="Profile"
-                android:padding="8dp"
+                android:padding="10dp"
                 android:src="@drawable/icon_person"
+                android:contentDescription="Profile"
                 app:tint="@android:color/white" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Search Bar -->
+    <!-- Search (floating) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/searchCard"
         android:layout_width="0dp"
-        android:layout_height="52dp"
+        android:layout_height="54dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="-18dp"
-        app:cardCornerRadius="25dp"
-        app:cardElevation="8dp"
+        android:layout_marginTop="-22dp"
         android:backgroundTint="@android:color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="10dp"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp">
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
 
             <ImageView
                 android:id="@+id/searchIcon"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
-                android:layout_marginStart="8dp"
-                app:tint="#7B8193"
+                app:tint="#8A90A3"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -136,35 +144,40 @@
                 android:id="@+id/searchBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:hint="Tìm kiếm cuộc trò chuyện..."
-                android:textSize="15sp"
-                android:textColorHint="#9AA0B1"
-                android:textColor="#1F2430"
+                android:layout_marginStart="10dp"
                 android:background="@android:color/transparent"
+                android:hint="Tìm kiếm cuộc trò chuyện..."
                 android:inputType="text"
                 android:maxLines="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textColor="#1F2430"
+                android:textColorHint="#9AA0B1"
+                android:textSize="15sp"
                 app:layout_constraintStart_toEndOf="@id/searchIcon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- RecyclerView cho danh sách chat -->
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewChats"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:clipToPadding="false"
+        android:paddingTop="6dp"
         android:paddingBottom="16dp"
+        android:clipToPadding="false"
         android:background="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchCard"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        tools:listitem="@layout/item_chat" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
