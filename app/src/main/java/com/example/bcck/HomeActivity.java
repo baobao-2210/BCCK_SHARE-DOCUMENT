@@ -241,7 +241,7 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void loadFragment(Fragment fragment, int index) {
+    public void loadFragment(Fragment fragment, int index) {
         if (currentFragmentIndex == index &&
                 getSupportFragmentManager().findFragmentById(R.id.fragmentContainer) != null) {
             return;
@@ -258,7 +258,7 @@ public class HomeActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void updateBottomNav(int selectedIndex) {
+    public void updateBottomNav(int selectedIndex) {
         resetNavItem(navDocsIcon, navDocsText);
         resetNavItem(navGroupIcon, navGroupText);
         resetNavItem(navLibraryIcon, navLibraryText);
