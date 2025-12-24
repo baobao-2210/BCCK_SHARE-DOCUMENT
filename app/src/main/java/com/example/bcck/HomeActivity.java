@@ -1,6 +1,10 @@
 package com.example.bcck;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,7 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.core.app.NotificationCompat;
 
+import com.example.bcck.Chat.ChatDetailActivity;
 import com.example.bcck.Chat.ChatFragment;
 import com.example.bcck.Home.HomeFragment;
 import com.example.bcck.Profile.ProfileFragment;
@@ -21,14 +27,21 @@ import com.example.bcck.poster.DocumentFragment;
 // ✅ Firebase imports
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class HomeActivity extends AppCompatActivity {
+
+    private static final String MSG_CHANNEL_ID = "msg_channel";
 
     // Bottom Navigation Views
     private ConstraintLayout navDocs, navGroup, navLibrary, navChat, navProfile;
@@ -36,6 +49,9 @@ public class HomeActivity extends AppCompatActivity {
     private TextView navDocsText, navGroupText, navLibraryText, navChatText, navProfileText;
 
     private int currentFragmentIndex = 0; // Theo dõi fragment hiện tại
+    private ListenerRegistration notiListener;
+    private Timestamp appStartTime;
+    private final Set<String> shownNotiIds = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +63,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // ✅ 2) Lấy FCM token và lưu lên Firestore (để Cloud Function gửi được)
         saveFcmTokenToFirestore();
+        startInAppNotificationListener();
 
         // Khởi tạo views
         initViews();
@@ -90,6 +107,83 @@ public class HomeActivity extends AppCompatActivity {
                             .collection("fcmTokens").document(token)
                             .set(data, SetOptions.merge());
                 });
+    }
+
+    private void startInAppNotificationListener() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        appStartTime = Timestamp.now();
+
+        if (notiListener != null) notiListener.remove();
+
+        notiListener = FirebaseFirestore.getInstance()
+                .collection("users").document(myUid)
+                .collection("notifications")
+                .orderBy("createdAt", Query.Direction.ASCENDING)
+                .limitToLast(50)
+                .addSnapshotListener((snap, e) -> {
+                    if (e != null || snap == null) return;
+
+                    for (DocumentChange dc : snap.getDocumentChanges()) {
+                        if (dc.getType() != DocumentChange.Type.ADDED) continue;
+
+                        String docId = dc.getDocument().getId();
+                        if (shownNotiIds.contains(docId)) continue;
+
+                        Timestamp createdAt = dc.getDocument().getTimestamp("createdAt");
+                        if (createdAt == null || createdAt.compareTo(appStartTime) <= 0) continue;
+
+                        String title = dc.getDocument().getString("title");
+                        String content = dc.getDocument().getString("content");
+                        String chatId = dc.getDocument().getString("chatId");
+
+                        showLocalNotification(
+                                title != null ? title : "Tin nhắn mới",
+                                content != null ? content : "Bạn có tin nhắn mới",
+                                chatId
+                        );
+                        shownNotiIds.add(docId);
+                    }
+                });
+    }
+
+    private void showLocalNotification(String title, String body, String chatId) {
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (nm == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    MSG_CHANNEL_ID, "Messages", NotificationManager.IMPORTANCE_HIGH
+            );
+            nm.createNotificationChannel(channel);
+        }
+
+        Intent intent;
+        if (chatId != null && !chatId.trim().isEmpty()) {
+            intent = new Intent(this, ChatDetailActivity.class);
+            intent.putExtra("chatId", chatId);
+        } else {
+            intent = new Intent(this, com.example.bcck.Home.NotificationActivity.class);
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pi = PendingIntent.getActivity(
+                this,
+                (int) System.currentTimeMillis(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0)
+        );
+
+        NotificationCompat.Builder b = new NotificationCompat.Builder(this, MSG_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pi);
+
+        nm.notify((int) System.currentTimeMillis(), b.build());
     }
 
     private void initViews() {
@@ -188,5 +282,11 @@ public class HomeActivity extends AppCompatActivity {
     private void highlightNavItem(ImageView icon, TextView text) {
         icon.setColorFilter(0xFF5B5FC7);
         text.setTextColor(0xFF5B5FC7);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (notiListener != null) notiListener.remove();
     }
 }
