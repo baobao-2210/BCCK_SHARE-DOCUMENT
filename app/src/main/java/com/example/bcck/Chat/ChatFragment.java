@@ -18,7 +18,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bcck.Home.NotificationActivity;
 import com.example.bcck.HomeActivity;
+import com.example.bcck.Profile.ProfileFragment;
 import com.example.bcck.R;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -235,13 +237,21 @@ public class ChatFragment extends Fragment {
             // startActivity(new Intent(getActivity(), SelectUserActivity.class));
         });
 
-        iconNotification.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Thông báo", Toast.LENGTH_SHORT).show()
-        );
+        iconNotification.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), NotificationActivity.class);
+            startActivity(intent);
+        });
 
-        iconProfile.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Cá nhân", Toast.LENGTH_SHORT).show()
-        );
+
+        iconProfile.setOnClickListener(v -> {
+            if (getActivity() instanceof HomeActivity) {
+                HomeActivity activity = (HomeActivity) getActivity();
+                activity.loadFragment(new ProfileFragment(), 4);
+                activity.updateBottomNav(4);
+            }
+        });
+
+
     }
 
     private String makeAvatarText(String title) {
