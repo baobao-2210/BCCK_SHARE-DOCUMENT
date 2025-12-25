@@ -18,22 +18,25 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
     private static final long LOGIN_TIMEOUT_MS = 12000L;
+
     private AppCompatButton btnSinhVien, btnGiangVien;
     private EditText edtGmail, edtMatKhau;
     private MaterialButton btnSubmitDangNhap;
+
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private Runnable loginTimeoutRunnable;
 
     private boolean isSinhVien = true;
 
-    // Firebase Auth
+    // Firebase
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         initViews();
         setupInitialState();
@@ -98,38 +102,65 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if (!isNetworkAvailable()) {
-            Toast.makeText(this, "Không có kết nối mạng. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không có kết nối mạng", Toast.LENGTH_SHORT).show();
             return;
         }
 
         setLoadingState(true);
         scheduleLoginTimeout();
 
-        // 🔥 Thực hiện đăng nhập Firebase
         mAuth.signInWithEmailAndPassword(gmail, matKhau)
-                .addOnCompleteListener(this, task -> {
+                .addOnSuccessListener(authResult -> {
+
+                    String uid = mAuth.getCurrentUser().getUid();
+
+                    // 🔥 CHECK FIRESTORE USER
+                    db.collection("users")
+                            .document(uid)
+                            .get()
+                            .addOnSuccessListener(document -> {
+
+                                cancelLoginTimeout();
+                                setLoadingState(false);
+
+                                if (!document.exists()) {
+                                    Toast.makeText(this, "Tài khoản chưa được cấp quyền", Toast.LENGTH_SHORT).show();
+                                    mAuth.signOut();
+                                    return;
+                                }
+
+                                Boolean isActive = document.getBoolean("isActive");
+                                if (isActive != null && !isActive) {
+                                    Toast.makeText(this, "Tài khoản đã bị khóa", Toast.LENGTH_SHORT).show();
+                                    mAuth.signOut();
+                                    return;
+                                }
+
+                                // ✅ OK → VÀO APP
+                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(this, HomeActivity.class));
+                                finish();
+
+                            })
+                            .addOnFailureListener(e -> {
+                                cancelLoginTimeout();
+                                setLoadingState(false);
+                                Toast.makeText(this, "Lỗi dữ liệu người dùng", Toast.LENGTH_SHORT).show();
+                                mAuth.signOut();
+                            });
+
+                })
+                .addOnFailureListener(e -> {
                     cancelLoginTimeout();
                     setLoadingState(false);
 
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "signInWithEmail:success");
-                        Toast.makeText(RegisterActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                        
-                        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        finish();
+                    String msg = e.getMessage() != null ? e.getMessage() : "Đăng nhập thất bại";
+                    if (msg.contains("no user record")) {
+                        Toast.makeText(this, "Tài khoản không tồn tại", Toast.LENGTH_SHORT).show();
+                    } else if (msg.contains("password")) {
+                        Toast.makeText(this, "Mật khẩu không đúng", Toast.LENGTH_SHORT).show();
                     } else {
-                        Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Lỗi không xác định";
-                        
-                        // Thông báo lỗi cụ thể để bạn dễ debug
-                        if (errorMessage.contains("no user record")) {
-                            Toast.makeText(this, "Tài khoản không tồn tại!", Toast.LENGTH_SHORT).show();
-                        } else if (errorMessage.contains("password is invalid")) {
-                            Toast.makeText(this, "Mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Đăng nhập thất bại: " + errorMessage, Toast.LENGTH_LONG).show();
-                        }
+                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -138,7 +169,7 @@ public class RegisterActivity extends AppCompatActivity {
         cancelLoginTimeout();
         loginTimeoutRunnable = () -> {
             setLoadingState(false);
-            Toast.makeText(this, "Hết thời gian chờ. Vui lòng kiểm tra mạng.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Hết thời gian chờ", Toast.LENGTH_SHORT).show();
         };
         mainHandler.postDelayed(loginTimeoutRunnable, LOGIN_TIMEOUT_MS);
     }
@@ -157,17 +188,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) {
-            return false;
-        }
+        if (cm == null) return false;
+
         Network network = cm.getActiveNetwork();
-        if (network == null) {
-            return false;
-        }
+        if (network == null) return false;
+
         NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
-        return capabilities != null
-                && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        return capabilities != null &&
+                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
     }
 }
