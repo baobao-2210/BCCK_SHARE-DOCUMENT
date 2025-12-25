@@ -1,24 +1,29 @@
 package com.example.bcck;
 
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.widget.EditText;
-import android.widget.Toast;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.util.Log;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -29,14 +34,13 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText edtGmail, edtMatKhau;
     private MaterialButton btnSubmitDangNhap;
 
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private Runnable loginTimeoutRunnable;
-
     private boolean isSinhVien = true;
 
-    // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable timeoutRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,6 @@ public class RegisterActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         initViews();
-        setupInitialState();
         setupListeners();
         updateRoleToggle();
     }
@@ -58,10 +61,6 @@ public class RegisterActivity extends AppCompatActivity {
         edtGmail = findViewById(R.id.edtGmail);
         edtMatKhau = findViewById(R.id.edtMatKhau);
         btnSubmitDangNhap = findViewById(R.id.btnSubmitDangNhap);
-    }
-
-    private void setupInitialState() {
-        btnSubmitDangNhap.setText("Đăng Nhập");
     }
 
     private void setupListeners() {
@@ -93,10 +92,10 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void handleLogin() {
-        String gmail = edtGmail.getText().toString().trim();
-        String matKhau = edtMatKhau.getText().toString().trim();
+        String email = edtGmail.getText().toString().trim();
+        String password = edtMatKhau.getText().toString().trim();
 
-        if (gmail.isEmpty() || matKhau.isEmpty()) {
+        if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -106,84 +105,139 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        setLoadingState(true);
-        scheduleLoginTimeout();
+        setLoading(true);
+        startTimeout();
 
-        mAuth.signInWithEmailAndPassword(gmail, matKhau)
-                .addOnSuccessListener(authResult -> {
+        Log.d(TAG, "signInWithEmailAndPassword: " + email);
 
-                    String uid = mAuth.getCurrentUser().getUid();
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        finishLoading();
 
-                    // 🔥 CHECK FIRESTORE USER
+                        String msg = (task.getException() != null && task.getException().getMessage() != null)
+                                ? task.getException().getMessage()
+                                : "Đăng nhập thất bại";
+
+                        Log.e(TAG, "Login failed: " + msg, task.getException());
+
+                        if (msg.contains("no user record")) {
+                            Toast.makeText(this, "Tài khoản không tồn tại", Toast.LENGTH_SHORT).show();
+                        } else if (msg.toLowerCase().contains("password")) {
+                            Toast.makeText(this, "Sai mật khẩu", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                        }
+                        return;
+                    }
+
+                    FirebaseUser user = (task.getResult() != null) ? task.getResult().getUser() : mAuth.getCurrentUser();
+                    if (user == null) {
+                        finishLoading();
+                        Toast.makeText(this, "Không lấy được thông tin user", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String uid = user.getUid();
+                    Log.d(TAG, "Login success, uid=" + uid);
+
+                    // Lấy user profile trên Firestore
                     db.collection("users")
                             .document(uid)
                             .get()
-                            .addOnSuccessListener(document -> {
-
-                                cancelLoginTimeout();
-                                setLoadingState(false);
-
-                                if (!document.exists()) {
-                                    Toast.makeText(this, "Tài khoản chưa được cấp quyền", Toast.LENGTH_SHORT).show();
+                            .addOnCompleteListener(userTask -> {
+                                if (!userTask.isSuccessful()) {
+                                    finishLoading();
+                                    Log.e(TAG, "Get user doc failed", userTask.getException());
+                                    Toast.makeText(this, "Lỗi dữ liệu người dùng", Toast.LENGTH_SHORT).show();
                                     mAuth.signOut();
                                     return;
                                 }
 
+                                var document = userTask.getResult();
+                                if (document == null) {
+                                    finishLoading();
+                                    Toast.makeText(this, "Không đọc được dữ liệu user", Toast.LENGTH_SHORT).show();
+                                    mAuth.signOut();
+                                    return;
+                                }
+
+                                // CHƯA CÓ USER → TẠO
+                                if (!document.exists()) {
+                                    Log.d(TAG, "User doc not exist -> creating...");
+
+                                    Map<String, Object> newUser = new HashMap<>();
+                                    newUser.put("email", email);
+                                    newUser.put("role", isSinhVien ? "student" : "teacher");
+                                    newUser.put("isActive", true);
+                                    newUser.put("createdAt", FieldValue.serverTimestamp());
+
+                                    db.collection("users")
+                                            .document(uid)
+                                            .set(newUser)
+                                            .addOnCompleteListener(createTask -> {
+                                                if (!createTask.isSuccessful()) {
+                                                    finishLoading();
+                                                    Log.e(TAG, "Create user doc failed", createTask.getException());
+                                                    Toast.makeText(this, "Không tạo được user", Toast.LENGTH_SHORT).show();
+                                                    mAuth.signOut();
+                                                    return;
+                                                }
+
+                                                finishLoading();
+                                                goHome();
+                                            });
+
+                                    return;
+                                }
+
+                                // CHECK KHÓA
                                 Boolean isActive = document.getBoolean("isActive");
                                 if (isActive != null && !isActive) {
+                                    finishLoading();
                                     Toast.makeText(this, "Tài khoản đã bị khóa", Toast.LENGTH_SHORT).show();
                                     mAuth.signOut();
                                     return;
                                 }
 
-                                // ✅ OK → VÀO APP
-                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, HomeActivity.class));
-                                finish();
-
-                            })
-                            .addOnFailureListener(e -> {
-                                cancelLoginTimeout();
-                                setLoadingState(false);
-                                Toast.makeText(this, "Lỗi dữ liệu người dùng", Toast.LENGTH_SHORT).show();
-                                mAuth.signOut();
+                                finishLoading();
+                                goHome();
                             });
-
-                })
-                .addOnFailureListener(e -> {
-                    cancelLoginTimeout();
-                    setLoadingState(false);
-
-                    String msg = e.getMessage() != null ? e.getMessage() : "Đăng nhập thất bại";
-                    if (msg.contains("no user record")) {
-                        Toast.makeText(this, "Tài khoản không tồn tại", Toast.LENGTH_SHORT).show();
-                    } else if (msg.contains("password")) {
-                        Toast.makeText(this, "Mật khẩu không đúng", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-                    }
                 });
     }
 
-    private void scheduleLoginTimeout() {
-        cancelLoginTimeout();
-        loginTimeoutRunnable = () -> {
-            setLoadingState(false);
-            Toast.makeText(this, "Hết thời gian chờ", Toast.LENGTH_SHORT).show();
+    private void goHome() {
+        Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(this, HomeActivity.class));
+        finish();
+    }
+
+    private void setLoading(boolean loading) {
+        btnSubmitDangNhap.setEnabled(!loading);
+        btnSubmitDangNhap.setText(loading ? "Đang xử lý..." : "Đăng Nhập");
+    }
+
+    private void finishLoading() {
+        stopTimeout();
+        setLoading(false);
+    }
+
+    private void startTimeout() {
+        stopTimeout();
+        timeoutRunnable = () -> {
+            // Nếu tới đây mà vẫn chưa xong -> trả UI về bình thường
+            Log.e(TAG, "Login timeout!");
+            finishLoading();
+            Toast.makeText(this, "Hết thời gian chờ. Kiểm tra mạng/Firebase", Toast.LENGTH_SHORT).show();
         };
-        mainHandler.postDelayed(loginTimeoutRunnable, LOGIN_TIMEOUT_MS);
+        handler.postDelayed(timeoutRunnable, LOGIN_TIMEOUT_MS);
     }
 
-    private void cancelLoginTimeout() {
-        if (loginTimeoutRunnable != null) {
-            mainHandler.removeCallbacks(loginTimeoutRunnable);
-            loginTimeoutRunnable = null;
+    private void stopTimeout() {
+        if (timeoutRunnable != null) {
+            handler.removeCallbacks(timeoutRunnable);
+            timeoutRunnable = null;
         }
-    }
-
-    private void setLoadingState(boolean isLoading) {
-        btnSubmitDangNhap.setEnabled(!isLoading);
-        btnSubmitDangNhap.setText(isLoading ? "Đang xử lý..." : "Đăng Nhập");
     }
 
     private boolean isNetworkAvailable() {
