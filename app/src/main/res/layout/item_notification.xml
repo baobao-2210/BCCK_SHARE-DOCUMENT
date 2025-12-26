@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
-    android:layout_marginBottom="6dp"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="2dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
     app:cardUseCompatPadding="true"
     app:cardBackgroundColor="@android:color/white">
 
@@ -15,21 +15,28 @@
         android:id="@+id/notification_item_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#F8F5F5"
         android:padding="14dp">
 
-        <!-- Icon -->
-        <ImageView
-            android:id="@+id/iv_icon"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="Icon thông báo"
-            android:padding="9dp"
-
+        <!-- Icon badge -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/iconBadge"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            android:backgroundTint="#EEF2FF"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_onedrive" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Icon thông báo"
+                android:padding="10dp"
+                tools:src="@drawable/ic_onedrive"
+                app:tint="#2F6BFF" />
+        </androidx.cardview.widget.CardView>
 
         <!-- Title -->
         <TextView
@@ -41,12 +48,21 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Tài liệu mới"
-            android:textColor="#111111"
-            android:textSize="15sp"
+            android:textColor="#111827"
+            android:textSize="15.5sp"
             android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/iconBadge"
             app:layout_constraintEnd_toStartOf="@id/iv_unread_dot"
-            app:layout_constraintStart_toEndOf="@id/iv_icon"
-            app:layout_constraintTop_toTopOf="@id/iv_icon" />
+            app:layout_constraintTop_toTopOf="@id/iconBadge" />
+
+        <!-- Unread dot -->
+        <View
+            android:id="@+id/iv_unread_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/bg_unread_dot"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_title" />
 
         <!-- Content -->
         <TextView
@@ -57,41 +73,38 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:text="TS. Nguyễn Văn A đã đăng tài liệu mới..."
-            android:textColor="#444444"
+            android:textColor="#4B5563"
             android:textSize="13.5sp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tv_title"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
-        <!-- Time -->
+        <!-- Time chip -->
         <TextView
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_time_chip"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:text="5 phút trước"
-            android:textColor="#888888"
+            android:textColor="#2563EB"
             android:textSize="12sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/tv_title"
             app:layout_constraintTop_toBottomOf="@id/tv_content" />
 
-        <!-- Unread dot -->
-        <View
-            android:id="@+id/iv_unread_dot"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="#02082A"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- divider nhẹ (tùy thích, có thể xoá) -->
+        <!-- Divider nhẹ -->
         <View
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
-            android:background="#020823"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:background="#EEF2F7"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_time" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

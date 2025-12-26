@@ -1,143 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="#F7F8FC"
     tools:context=".Home.NotificationActivity">
 
-    <!-- HEADER (trắng, đổ bóng nhẹ) -->
+    <!-- HEADER -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_bar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#2973EF"
-        android:elevation="4dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_notif_header"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/btn_back"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:contentDescription="Quay lại"
             android:padding="8dp"
+            android:contentDescription="Quay lại"
             android:src="@android:drawable/ic_menu_revert"
-
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@android:color/white"
+            android:background="@drawable/bg_icon_round"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="12dp"
             android:text="Thông báo"
-            android:textColor="#111111"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/btn_back"
-            app:layout_constraintEnd_toStartOf="@id/btn_mark_all_read"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@id/btn_back"
-            app:layout_constraintTop_toTopOf="@id/btn_back" />
+            app:layout_constraintEnd_toStartOf="@id/btn_mark_all_read"
+            app:layout_constraintTop_toTopOf="@id/btn_back"
+            app:layout_constraintBottom_toBottomOf="@id/btn_back"/>
 
         <TextView
             android:id="@+id/btn_mark_all_read"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="40dp"
             android:gravity="center"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:text="Đã đọc hết"
-            android:textColor="#3F51B5"
-            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/btn_back"
+            android:background="@drawable/bg_chip_white_15"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/btn_back" />
-
-        <!-- divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#EEEEEE"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
+            app:layout_constraintTop_toTopOf="@id/btn_back"
+            app:layout_constraintBottom_toBottomOf="@id/btn_back"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- THÔNG BÁO MỚI (dạng chip nhẹ) -->
+    <!-- UNREAD CHIP -->
     <TextView
         android:id="@+id/tv_unread_count"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
-        android:background="#F5F7FF"
-        android:gravity="center"
-        android:padding="12dp"
-        android:text="Thông báo mới"
-        android:textColor="#3F51B5"
+        android:background="@drawable/bg_card_white"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:text="Bạn có 0 thông báo chưa đọc"
+        android:textColor="#111827"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_bar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header_bar" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- TAB (nếu chưa dùng tab có thể để yên) -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout"
+    <!-- TAB CARD -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/tabCard"
         android:layout_width="0dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="12dp"
-        android:background="#B5BBC7"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="10dp"
+        app:cardCornerRadius="14dp"
+        app:cardElevation="1dp"
+        android:backgroundTint="@android:color/white"
         app:layout_constraintTop_toBottomOf="@id/tv_unread_count"
-        app:tabGravity="fill"
-        app:tabIndicatorColor="#3F51B5"
-        app:tabIndicatorHeight="3dp"
-        app:tabMode="fixed"
-        app:tabRippleColor="#1A3F51B5"
-        app:tabSelectedTextColor="#111111"
-        app:tabTextColor="#888888">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Giữ TabItem để không ảnh hưởng nếu bạn đang add tab ở code -->
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tất cả" />
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="@android:color/transparent"
+            app:tabGravity="fill"
+            app:tabMode="fixed"
+            app:tabIndicatorFullWidth="true"
+            app:tabIndicatorColor="#2F6BFF"
+            app:tabIndicatorHeight="3dp"
+            app:tabSelectedTextColor="#111827"
+            app:tabTextColor="#6B7280"
+            app:tabRippleColor="#1A2F6BFF">
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chưa đọc" />
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tất cả"/>
 
-    </com.google.android.material.tabs.TabLayout>
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chưa đọc"/>
+        </com.google.android.material.tabs.TabLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- LIST -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewNotifications"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@android:color/white"
+        android:layout_marginTop="10dp"
         android:clipToPadding="false"
-        android:paddingStart="12dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="12dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="14dp"
+        android:overScrollMode="never"
+        app:layout_constraintTop_toBottomOf="@id/tabCard"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tab_layout"
-        app:layout_constraintVertical_bias="0.0"
-        tools:listitem="@layout/item_notification" />
-
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_notification"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
